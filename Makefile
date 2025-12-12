@@ -22,6 +22,16 @@ GPINCLUDE = -I/opt/theoddbot-libs-open2x-soft-float/usr/include
 GPSDLCONFIG = /opt/theoddbot-libs-open2x-soft-float/usr/bin/sdl-config
 GPSTATIC = -static
 
+# - GCW-Zero toolchain (OpenDingux)
+GCW0TOOLCHAIN = /opt/gcw0-toolchain/usr/bin
+GCW0CC     = $(GCW0TOOLCHAIN)/mipsel-linux-gcc
+GCW0CXX    = $(GCW0TOOLCHAIN)/mipsel-linux-g++
+GCW0STRIP  = $(GCW0TOOLCHAIN)/mipsel-linux-strip
+GCW0CFLAGS = -DNOTPSP -D__GCW02X__ -D__GCW02X_SCREEN__ -DGCW0
+GCW0LIBS   = `/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/bin/sdl-config --libs` -lSDL_mixer -lm -lSDL_image -lpng -lz -ljpeg -lvorbisidec
+GCW0INCLUDE = -I/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/include
+GCW0SDLCONFIG = /opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/bin/sdl-config
+
 # --- source code target
 PCOBJS = bootmain.o debug.o input.o sound.o \
         grp_screen.o grp_texture.o grp_sprite.o
@@ -29,12 +39,15 @@ PCOBJS = bootmain.o debug.o input.o sound.o \
 GP2XOBJS = bootmain.o debug.o input.o sound.o \
           gp2x_grp_screen.o grp_texture.o grp_sprite.o
 
+GCW02XOBJS = bootmain.o debug.o input.o sound.o \
+          gp2x_grp_screen.o grp_texture.o grp_sprite.o
+
 # - your apprication object
 APPOBJS = gamemain.o puz_base.o puz_disp.o puz_trial.o
 
 
 #
-TARGET = tailtale-gp2x
+TARGET = tailtale
 
 CFLAGS = -O2 -Wall #-DDEBUG -g
 
@@ -77,6 +90,20 @@ gp : gpobjs
 	$(GPSTRIP) $(TARGET).gpe
 
 gpobjs : $(GP2XOBJS) $(APPOBJS)
+
+
+gcw : CC = $(GCW0CC)
+gcw : OBJS = $(GCW02XOBJS) $(APPOBJS)
+gcw : LIBS += $(GCW0LIBS)
+gcw : LIBS += $(shell $(GCW0SDLCONFIG) --libs)
+gcw : CFLAGS += $(GCW0CFLAGS)
+gcw : CFLAGS += $(shell $(GCW0SDLCONFIG) --cflags)
+gcw : INCLUDE = $(GCW0INCLUDE)
+gcw : gcwobjs
+	$(GCW0CXX) $(GCW0STATIC) -o $(TARGET) $(OBJS) $(LIBS)
+	$(GCW0STRIP) $(TARGET)
+
+gcwobjs : $(GCW02XOBJS) $(APPOBJS)
 
 
 clean :

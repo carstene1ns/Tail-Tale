@@ -20,7 +20,7 @@
 /* include                       */
 /*-------------------------------*/
 
-#include "SDL.h"
+#include <SDL.h>
 #include "grp_screen.h"
 #include "puz_trial.h"
 

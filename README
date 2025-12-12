@@ -5,6 +5,12 @@ Source release
 
 * Update
 
+  - Jan.24.2014
+	GCW-Zero build added by Shin-NiL <http://shinnil.blogspost.com.br>
+	 D-Pad - move cursor
+	 A/B buttons - grab/relese block
+	 Select - Quit game
+
   - Jan.13.2006
     add: Volume control enabled
     change: BGM file convert to OGG
@@ -17,6 +23,9 @@ Source release
 * build
   for GP2X
     % make gp
+
+  for GCW-Zero
+    % make gcw
 
   for PC
     % make

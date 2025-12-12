@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Tail-Tale
+Comment=An Action Puzzle Game
+Exec=tailtale
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=tailtale
+Categories=games

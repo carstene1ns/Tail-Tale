@@ -36,7 +36,7 @@
 #include <malloc.h>
 #endif
 
-#include "SDL.h"
+#include <SDL.h>
 #include "grp_texture.h"
 
 /*-------------------------------*/

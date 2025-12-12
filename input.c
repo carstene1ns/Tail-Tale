@@ -32,7 +32,7 @@
 /*-------------------------------*/
 
 #include "input.h"
-#include "SDL.h"
+#include <SDL.h>
 
 /*-------------------------------*/
 /* define                        */
@@ -110,10 +110,17 @@ void  key_read_down(SDL_KeyboardEvent *key)
     JoyKey[0] = JoyKey[0] | IN_Left;
   if (key->keysym.sym == SDLK_RIGHT)
     JoyKey[0] = JoyKey[0] | IN_Right;
+#ifdef GCW0
+  if (key->keysym.sym == SDLK_LCTRL) //A
+    JoyKey[0] = JoyKey[0] | IN_Button1;
+  if (key->keysym.sym == SDLK_LALT) //B
+    JoyKey[0] = JoyKey[0] | IN_Button2;
+#else
   if (key->keysym.sym == SDLK_z)
     JoyKey[0] = JoyKey[0] | IN_Button1;
   if (key->keysym.sym == SDLK_x)
     JoyKey[0] = JoyKey[0] | IN_Button2;
+#endif
   if (key->keysym.sym == SDLK_c)
     JoyKey[0] = JoyKey[0] | IN_Button3;
   if (key->keysym.sym == SDLK_v)
@@ -141,10 +148,17 @@ void  key_read_up(SDL_KeyboardEvent *key)
     JoyKey[0] = JoyKey[0] & (~(IN_Left));
   if (key->keysym.sym == SDLK_RIGHT)
     JoyKey[0] = JoyKey[0] & (~(IN_Right));
+#ifdef GCW0
+  if (key->keysym.sym == SDLK_LCTRL) //A
+    JoyKey[0] = JoyKey[0] & (~(IN_Button1));
+  if (key->keysym.sym == SDLK_LALT) //B
+    JoyKey[0] = JoyKey[0] & (~(IN_Button2));
+#else
   if (key->keysym.sym == SDLK_z)
     JoyKey[0] = JoyKey[0] & (~(IN_Button1));
   if (key->keysym.sym == SDLK_x)
     JoyKey[0] = JoyKey[0] & (~(IN_Button2));
+#endif
   if (key->keysym.sym == SDLK_c)
     JoyKey[0] = JoyKey[0] & (~(IN_Button3));
   if (key->keysym.sym == SDLK_v)

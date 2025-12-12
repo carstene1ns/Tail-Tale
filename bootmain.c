@@ -8,10 +8,10 @@
 #include <unistd.h>
 #endif
 
-#include "SDL.h"
-#include "SDL_main.h"
-#include "SDL_Audio.h"
-#include "SDL_mixer.h"
+#include <SDL.h>
+#include <SDL_main.h>
+#include <SDL_audio.h>
+#include <SDL_mixer.h>
 
 #include "bootmain.h"
 #include "debug.h"

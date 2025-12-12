@@ -35,7 +35,7 @@
 /* include                       */
 /*-------------------------------*/
 
-#include "SDL.h"
+#include <SDL.h>
 
 #include "grp_screen.h"
 

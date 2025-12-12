@@ -35,7 +35,7 @@
 /* include                       */
 /*-------------------------------*/
 
-#include "SDL.h"
+#include <SDL.h>
 
 #include "grp_texture.h"
 #include "grp_sprite.h"
