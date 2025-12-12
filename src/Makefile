@@ -37,10 +37,10 @@ PCOBJS = bootmain.o debug.o input.o sound.o \
         grp_screen.o grp_texture.o grp_sprite.o
 
 GP2XOBJS = bootmain.o debug.o input.o sound.o \
-          gp2x_grp_screen.o grp_texture.o grp_sprite.o
+          gp2x/grp_screen.o grp_texture.o grp_sprite.o
 
 GCW02XOBJS = bootmain.o debug.o input.o sound.o \
-          gp2x_grp_screen.o grp_texture.o grp_sprite.o
+          gp2x/grp_screen.o grp_texture.o grp_sprite.o
 
 # - your apprication object
 APPOBJS = gamemain.o puz_base.o puz_disp.o puz_trial.o
@@ -113,7 +113,6 @@ bootmain.o : bootmain.c bootmain.h debug.h
 debug.o : debug.c debug.h
 psp_debug.o : psp_debug.c debug.h
 grp_screen.o : grp_screen.c grp_screen.h grp_texture.h
-psp_grp_screen.o : psp_grp_screen.c grp_screen.h grp_texture.h
 input.o : input.c
 sound.o : sound.h
 grp_texture.o : grp_texture.c grp_texture.h

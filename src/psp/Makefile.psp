@@ -1,0 +1,33 @@
+# --- puzzle02 makefile
+#
+
+# --- source code target
+PSPOBJS = ../bootmain.o debug.o ../input.o ../sound.o \
+         grp_screen.o ../grp_texture.o ../grp_sprite.o
+
+# - your apprication object
+APPOBJS = ../gamemain.o ../puz_base.o ../puz_disp.o ../puz_trial.o
+
+OBJS = $(PSPOBJS) $(APPOBJS)
+
+#
+TARGET = puzzle
+
+CFLAGS = -O2 -g -Wall -DDEBUG
+LIBS=
+LIBDIR =
+LDFLAGS =
+
+EXTRA_TARGETS = EBOOT.PBP kxploit
+EXTRA_CLEAN = pcclean
+
+PSP_EBOOT_TITLE = PUZ02-DEV
+PSP_DIR_NAME = PUZ02
+
+PSPSDK=$(shell psp-config --pspsdk-path)
+PSPBIN = $(PSPSDK)/../bin
+CFLAGS += $(shell $(PSPBIN)/sdl-config --cflags)
+LIBS += $(shell $(PSPBIN)/sdl-config --libs)
+LIBS += -lSDL_mixer -lm -lSDL -lSDLmain -lSDL_image -lpng -lz -ljpeg
+
+include $(PSPSDK)/lib/build.mak

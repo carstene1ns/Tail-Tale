@@ -29,15 +29,11 @@ add_executable(tailtale WIN32
 	src/bootmain.c src/bootmain.h
 	src/debug.c src/debug.h
 	src/gamemain.c src/gamemain.h
-	#src/gp2x_grp_screen.c
 	src/grp_screen.c src/grp_screen.h
 	src/grp_sprite.c src/grp_sprite.h
-	src/grp_table.h
-	src/grp_table_int.h
+	src/grp_table.h src/grp_table_int.h
 	src/grp_texture.c src/grp_texture.h
 	src/input.c src/input.h
-	#src/psp_debug.c
-	#src/psp_grp_screen.c
 	src/puz_base.c src/puz_base.h
 	src/puz_disp.c src/puz_disp.h
 	src/puz_trial.c src/puz_trial.h
