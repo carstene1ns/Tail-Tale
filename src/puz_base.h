@@ -72,11 +72,11 @@ enum SwapFlag {
 };
 
 /* --- ゲームの難易度設定 */
-enum {
+enum GameLevel {
   LevelEasy = 0,
   LevelNormal,
   LevelHard
-} GameLevel;
+};
 
 
 

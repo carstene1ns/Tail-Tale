@@ -37,7 +37,7 @@
 #endif
 
 /* --- ゲームステップのラベル */
-enum {
+enum MainStep {
   TitleInit,
   TitleIn,
   TitleMain,
@@ -49,7 +49,7 @@ enum {
   ConfigInit,
   ConfigMain,
   ConfigFree
-} MainStep;
+};
 
 
 /*-------------------------------*/

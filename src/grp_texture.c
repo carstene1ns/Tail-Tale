@@ -135,7 +135,7 @@ void TGameTexture_Load(TGameTexture *class,
   loop = 0;
   pixdst = 0;
   pixsrc = 0;
-  if (class == NULL) {¥
+  if (class == NULL) {
     return;
   }
 
