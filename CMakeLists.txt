@@ -17,7 +17,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 		"MinSizeRel" "RelWithDebInfo")
 endif()
 
-set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_STANDARD 99)
 
 # Get the dependency libraries
 find_package(SDL REQUIRED)
@@ -43,9 +43,12 @@ add_executable(tailtale WIN32
 	src/puz_trial.c src/puz_trial.h
 	src/sound.c src/sound.h)
 
+# Game data
+set(DATA_PREFIX "data/" CACHE PATH "Where game data is located")
+
 # Define the compilation flags
 target_compile_options(tailtale PRIVATE -Wall)
-target_compile_definitions(tailtale PRIVATE NOTPSP __GP2X_SCREEN__)
+target_compile_definitions(tailtale PRIVATE NOTPSP DATA_PREFIX="${DATA_PREFIX}")
 option(DEBUG_LOG "Print debug message" OFF)
 if(DEBUG_LOG)
 	target_compile_definitions(tailtale PRIVATE DEBUG)

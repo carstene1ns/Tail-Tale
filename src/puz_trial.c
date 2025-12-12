@@ -142,7 +142,7 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     /* -- ゲームワーク初期化(TPuzzleBase) */
     TPuzzleBase_GameInit(class->super->super, 1);
     TPuzzleBase_GamePause(class->super->super, STEP_PAUSE);
-    SoundSE(3);
+    SoundMusicOneshot(4);
     class->readytimer = 0;
     class->step = TReady;
     break;
@@ -155,6 +155,7 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     /* - 一定時間で次へ */
     class->readytimer = class->readytimer + 1;
     if (class->readytimer > (84*2)) {
+      SoundMusicStop();
       SoundMusic(3);
       TPuzzleBase_GamePause(class->super->super, STEP_LINECHECK);
       class->step = TGame;

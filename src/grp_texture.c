@@ -150,7 +150,14 @@ void TGameTexture_Load(TGameTexture *class,
   }
 
   /* ----- テクスチャーの読み込み */
-  plane = IMG_Load(filename);
+  char name[256];
+#ifdef DATA_PREFIX
+  snprintf(name, sizeof(name), "%s/%s", DATA_PREFIX, filename);
+#else
+  snprintf(name, sizeof(name), "./data/%s", filename);
+#endif
+
+  plane = IMG_Load(name);
   if (plane == NULL) {
     class->bitmap[num] = NULL;
     return;

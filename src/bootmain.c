@@ -7,6 +7,7 @@
 #ifdef __GP2X__
 #include <unistd.h>
 #endif
+#include <time.h>
 
 #include <SDL.h>
 #include <SDL_main.h>
@@ -52,7 +53,7 @@ int  main(int argc, char *argv[])
   if (i != 0) {
     /* --- SDLが初期化できなかった */
 #ifdef DEBUG
-    printf("SDL initialize error.¥n");
+    printf("SDL initialize error.");
 #endif
     exit(-1);
   }
@@ -71,7 +72,7 @@ int  main(int argc, char *argv[])
   BeforeTiming = SystemTime;
   DispTime = 0;
   FrameCounter = 0;
-  srand(1);
+  srand(time(NULL));
   InputJoyKeySwap(FALSE);
 
   /* ----- ゲーム本体初期化 */

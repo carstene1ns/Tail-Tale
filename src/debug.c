@@ -55,7 +55,11 @@ char StockString[MessageMax][128];
 int  StockNum;
 
 /* ----- アスキーテクスチャー名 */
-char *TextureName = "ascii.bmp";
+#ifdef DATA_PREFIX
+char *TextureName = DATA_PREFIX "/ascii.bmp";
+#else
+char *TextureName = "./data/ascii.bmp";
+#endif
 
 /* --- デバッグフォント文字列 */
 char  debug_line[128];
