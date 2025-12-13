@@ -20,23 +20,15 @@
 /* include                       */
 /*-------------------------------*/
 
+#include <stdbool.h>
 #include <SDL.h>
-#include <SDL_image.h>
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
 
 /* --- 管理する最大テクスチャー数 */
-#define  TEXTUREMAX  16
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
+#define TEXTUREMAX 16
 
 /*-------------------------------*/
 /* struct                        */
@@ -51,17 +43,10 @@ typedef struct {
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
-TGameTexture *TGameTexture_Create(void);
+TGameTexture *TGameTexture_Create();
 void TGameTexture_Destroy(TGameTexture *class);
+void TGameTexture_Load(TGameTexture *class, int num, char *filename,
+                       SDL_Surface *GameScreen, bool preconv);
+SDL_Surface  *TGameTexture_GetTexture(TGameTexture *class, int index);
 
-void TGameTexture_Load(TGameTexture *class,
-		       int num,
-		       char *filename,
-                       SDL_Surface *GameScreen,
-                       int preconv);
-SDL_Surface  *TGameTexture_GetTexture(TGameTexture *class,
-				      int index);
-
-
-
-#endif //GRP_SCREEN_H
+#endif //GRP_TEXTURE_H

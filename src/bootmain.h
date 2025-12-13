@@ -9,7 +9,6 @@
 /*     大元のメインルーチンとその起動処理                 */
 /*                                                        */
 /*--------------------------------------------------------*/
-/* -- $Id: bootmain.pp,v 1.6 2002/08/10 03:05:14 rero2 Exp $ */
 
 #ifndef BOOTMAIN_H
 #define BOOTMAIN_H
@@ -20,23 +19,19 @@
 
 /* ----- 画面サイズ設定値 */
 
-#define  SCREEN_WIDTH   320
-#define  SCREEN_HEIGHT  240
+#define SCREEN_WIDTH  320
+#define SCREEN_HEIGHT 240
 #ifdef __GP2X__
-#define  SCREEN_DEPTH   16
+#define SCREEN_DEPTH  16
 #else
-#define  SCREEN_DEPTH   32
+#define SCREEN_DEPTH  32
 #endif
 
 /* ----- フレームレートの設定 */
-#define  FRAME_RATE     60
+#define FRAME_RATE     60
 #define FRAME_SKIP_MAX  6
 
 /* ----- window title */
-char   *WindowName = "Shippo no Puzzle - Tail Tale";
-
+char *WindowName = "Shippo no Puzzle - Tail Tale";
 
 #endif //BOOTMAIN_H
-
-
-

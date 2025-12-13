@@ -12,21 +12,17 @@
 /*     デバッグ用チェックルーチン                         */
 /*                                                        */
 /*--------------------------------------------------------*/
-/* -- $Id: debug.pp,v 1.3 2002/07/11 17:21:47 rero2 Exp $ */
-
 
 /*------------------------------------------------------------- */
 /** @file
     @brief		デバッグチェックルーチン
     @author		K.Kunikane (rerofumi)
     @since		Jul.27.2005
-    $Revision: 1.1.1.1 $
 */
 /*-----------------------------------------------------
  Copyright (C) 2002,2005 rerofumi <rero2@yuumu.org>
  All Rights Reserved.
  ------------------------------------------------------*/
-
 
 #ifndef DEBUG_H
 #define DEBUG_H
@@ -36,7 +32,6 @@
 /*-------------------------------*/
 
 #include <SDL.h>
-
 #include "grp_screen.h"
 
 /*-------------------------------*/
@@ -76,12 +71,11 @@ extern char debug_line[128];
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
-void  TDebugInit(TGameScreen *screen,
-		int Width, int Height, int Depth);
-void  TDebugFree(void);
-void  TDebugDisp(TGameScreen *screen);
-void  TDebugPrint(char *mes);
-void  IntToStr(int num, char *buf);
-void  IntToHex(int num, int length, char *buf);
+void TDebugInit(TGameScreen *screen, int Width, int Height, int Depth);
+void TDebugFree();
+void TDebugDisp(TGameScreen *screen);
+void TDebugPrint(char *mes);
+void IntToStr(int num, char *buf);
+void IntToHex(int num, int length, char *buf);
 
 #endif //DEBUG_H

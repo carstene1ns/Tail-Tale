@@ -12,15 +12,12 @@
 /*     デバッグ用チェックルーチン                         */
 /*                                                        */
 /*--------------------------------------------------------*/
-/* -- $Id: debug.pp,v 1.3 2002/07/11 17:21:47 rero2 Exp $ */
-
 
 /*------------------------------------------------------------- */
 /** @file
     @brief		画面表示管理
     @author		K.Kunikane (rerofumi)
     @since		Jul.27.2005
-    $Revision: 1.1.1.1 $
 */
 /*-----------------------------------------------------
  Copyright (C) 2002,2005 rerofumi <rero2@yuumu.org>
@@ -45,7 +42,7 @@
 /*-------------------------------*/
 
 /* --- 管理する最大スプライト数 */
-#define  SPRITEMAX  1024
+#define SPRITEMAX 1024
 
 
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -74,8 +71,10 @@ typedef struct {
   int Depth;
   /// 現在描画ターゲットになっている GU フレームバッファのポインタ
   unsigned char *current_buffer_ptr;
+#ifdef __PSP__
   /// PSPでのGU描画パケットエリア
   unsigned int  *packet;
+#endif
 } TGameScreen, *PTGameScreen;
 
 
@@ -88,17 +87,9 @@ void TGameScreen_Destroy(TGameScreen *class);
 void TGameScreen_SetWMName(TGameScreen *class, char *name);
 void TGameScreen_DispScreen(TGameScreen *class);
 void TGameScreen_RefreshScreen(TGameScreen *class);
-
 TGameSprite *TGameScreen_GetSprite(TGameScreen *class, int id);
 SDL_Surface *TGameScreen_GetTexture(TGameScreen *class, int id);
 void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename);
 void TGameScreen_LoadTexturePure(TGameScreen *class, int num, char *filename);
 
-
 #endif //GRP_SCREEN_H
-
-
-
-
-
-

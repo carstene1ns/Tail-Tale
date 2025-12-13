@@ -13,7 +13,7 @@ OBJS = $(PSPOBJS) $(APPOBJS)
 #
 TARGET = puzzle
 
-CFLAGS = -O2 -g -Wall -DDEBUG
+CFLAGS = -O2 -g -Wall -DDEBUG -D__PSP__
 LIBS=
 LIBDIR =
 LDFLAGS =

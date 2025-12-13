@@ -46,17 +46,14 @@ void SetBlock(TPuzzleBase *class);
 Block *GetBlock(TPuzzleBase *class);
 int  GetBlockColor(TPuzzleBase *class);
 void  PopupNext(TPuzzleBase *class);
-int  PopupWork(TPuzzleBase *class);
+bool PopupWork(TPuzzleBase *class);
 int  FieldHeight(TPuzzleBase *class);
-int  MoveWork(TPuzzleBase *class);
-int  DropRequest(TPuzzleBase *class);
-int  DropWork(TPuzzleBase *class);
+bool MoveWork(TPuzzleBase *class);
+bool DropRequest(TPuzzleBase *class);
+bool DropWork(TPuzzleBase *class);
 int  LineCheck(TPuzzleBase *class);
-int  LineWork(TPuzzleBase *class);
-int  LineCount(TPuzzleBase *class,
-	       int x, int y,
-	       int dx, int dy,
-	       int layer);
+bool LineWork(TPuzzleBase *class);
+int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer);
 
 /*-------------------------------*/
 /* data table                    */
@@ -120,7 +117,6 @@ int  LevelSpeed_veryhard[30] = {
   120, 120, 100, 100,  80 };
 
 
-
 int  LevelBlock[30] = {
   0,  30,  60, 100, 150,
   200, 250, 300, 350, 400,
@@ -139,14 +135,11 @@ int  LevelBlock[30] = {
 /* --- コンストラクタ・デストラクタ         */
 TPuzzleBase *TPuzzleBase_Create(int difficult)
 {
-  TPuzzleBase *class;
-  int  i;
-
   /* --- インスタンスの確保 */
-  class = malloc(sizeof(TPuzzleBase));
+  TPuzzleBase *class = malloc(sizeof(TPuzzleBase));
   /* --- 確保できたら初期化 */
   if (class) {
-    for(i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+    for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
       class->Field[i] = 0;
     }
   }
@@ -154,7 +147,7 @@ TPuzzleBase *TPuzzleBase_Create(int difficult)
   class->Difficult = difficult;
 
   /* --- インスタンスを渡して終了 */
-  return(class);
+  return class;
 }
 
 void  TPuzzleBase_Destroy(TPuzzleBase *class)
@@ -180,12 +173,12 @@ void TPuzzleBase_GameInit(TPuzzleBase *class, int col)
   /* --- ブロック情報初期化 */
   for(i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     class->Item[i].Color = 0;
-    class->Item[i].LineCheck = FALSE;
-    class->Item[i].LineBlock = FALSE;
+    class->Item[i].LineCheck = false;
+    class->Item[i].LineBlock = false;
     class->Item[i].LineTimer = 0;
     class->Item[i].PopupTimer = 0;
     class->Item[i].PopupOffset = 0;
-    class->Item[i].DropCheck = FALSE;
+    class->Item[i].DropCheck = false;
     class->Item[i].DropTimer = 0;
     class->Item[i].DropOffset = 0;
     class->Item[i].SwapSide = SWAP_NONE;
@@ -194,7 +187,7 @@ void TPuzzleBase_GameInit(TPuzzleBase *class, int col)
     class->Item[i].SwapOffsetY = 0;
   }
   class->GameStep = STEP_PAUSE;
-  class->Animation = FALSE;
+  class->Animation = false;
   class->CharaColor = col;
   class->Level = 1;
   class->ColorNum = 3;
@@ -204,7 +197,7 @@ void TPuzzleBase_GameInit(TPuzzleBase *class, int col)
   class->EraseScore = 0;
   class->Score = 0;
   class->Combo = 1;
-  class->GameOver = FALSE;
+  class->GameOver = false;
   TPuzzleBase_GameLevel(class, class->Level);
   /* --- ブロックカラー */
   for(i=0; i<7; i++) {
@@ -238,9 +231,9 @@ void TPuzzleBase_GameExec(TPuzzleBase *class)
 
     /* --- 通常待ち受け状態 */
   case STEP_NORMAL:
-    class->Animation = FALSE;
+    class->Animation = false;
     class->Combo = 1;
-    if (PopupWork(class) == TRUE) {
+    if (PopupWork(class)) {
       class->GameStep = STEP_LINECHECK;
     }
     break;
@@ -248,8 +241,8 @@ void TPuzzleBase_GameExec(TPuzzleBase *class)
     /* --- ユーザーによるブロック移動要求 */
   case STEP_SWAP:
     PopupWork(class);
-    if (MoveWork(class) == FALSE) {
-      if (DropRequest(class) ==TRUE) {
+    if (!MoveWork(class)) {
+      if (DropRequest(class)) {
 	class->GameStep = STEP_DROPWORK;
       }
       else {
@@ -270,7 +263,7 @@ void TPuzzleBase_GameExec(TPuzzleBase *class)
 
     /* --- 動かした後落下を伴うか */
   case STEP_DROPCHECK:
-    if (DropRequest(class) == TRUE) {
+    if (DropRequest(class)) {
       class->GameStep = STEP_DROPWORK;
     }
     else {
@@ -280,9 +273,9 @@ void TPuzzleBase_GameExec(TPuzzleBase *class)
 
     /* --- 落下中処理 */
   case STEP_DROPWORK:
-    class->Animation = TRUE;
+    class->Animation = true;
     PopupWork(class);
-    if (DropWork(class) == FALSE) {
+    if (!DropWork(class)) {
       class->GameStep = STEP_LINECHECK;
     }
     break;
@@ -304,9 +297,9 @@ void TPuzzleBase_GameExec(TPuzzleBase *class)
 
     /* --- ライン揃い時のブロック点滅アニメーション */
   case STEP_LINEFLASH:
-    class->Animation = TRUE;
+    class->Animation = true;
     PopupWork(class);
-    if (LineWork(class) == FALSE) {
+    if (!LineWork(class)) {
       class->Combo = class->Combo + 1;
       class->GameStep = STEP_DROPCHECK;
     }
@@ -337,10 +330,8 @@ void TPuzzleBase_GamePause(TPuzzleBase *class, int  mode)
 /* ---------------------------------------- */
 void TPuzzleBase_GameLevel(TPuzzleBase *class, int lset)
 {
-  int  l;
-
   /* -- レベルに合わせて難易度設定 */
-  l = lset - 1;
+  int l = lset - 1;
   if (l < 0) {
     l = 0;
   }
@@ -369,32 +360,28 @@ void TPuzzleBase_GameLevel(TPuzzleBase *class, int lset)
 
 /* ---------------------------------------- */
 /* --- 現在のゲームレベル                   */
-/*     レベル変更で TRUE                    */
+/*     レベル変更で true                    */
 /* ---------------------------------------- */
-int  TPuzzleBase_LevelCheck(TPuzzleBase *class)
+bool TPuzzleBase_LevelCheck(TPuzzleBase *class)
 {
-  int  i, lv;
-  int  ret;
-
-  ret = FALSE;
-  lv = 0;
-  for(i=0; i<30; i++) {
+  int lv = 0;
+  for(int i=0; i<30; i++) {
     if (LevelBlock[i] < class->EraseBlock) {
       lv = i;
     }
   }
   if (lv == class->Level) {
     class->Level = class->Level + 1;
-    ret = TRUE;
+    return true;
   }
-  return(ret);
+  return false;
 }
 
 
 /* ---------------------------------------- */
 /* --- ブロックの入れ替えを行う             */
 /* ---------------------------------------- */
-int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
+bool  TPuzzleBase_MoveRequest(TPuzzleBase *class,
 			     int posx, int posy,
 			     int dir)
 {
@@ -402,24 +389,24 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
 
   /* --- カーソル位置にブロックが無いならスキップ */
   if (class->Field[posx + (posy * FIELD_WIDTH)] == 0)
-    return(FALSE);
+    return false;
 
   /* --- 壁方向へ移動しようとしていたらエラー */
   if ((posx == 0) && (dir == MOVE_LEFT)) 
-    return(FALSE);
+    return false;
 
   if ((posx == (FIELD_WIDTH - 1)) && (dir == MOVE_RIGHT))
-    return(FALSE);
+    return false;
 
   if ((posy == 1) && (dir == MOVE_DOWN))
-    return(FALSE);
+    return false;
 
   if ((posy == (FIELD_HEIGHT - 1)) && (dir == MOVE_UP))
-    return(FALSE);
+    return false;
 
   if ((class->Field[posx + ((posy - 1) * FIELD_WIDTH)] == 0) &&
       (dir == MOVE_UP))
-    return(FALSE);
+    return false;
 
   /* ---------------------------------------------- */
   /* --- 移動リクエスト  */
@@ -433,13 +420,13 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
       master->SwapTimer = 3;
       master->SwapOffsetX = 0;
       master->SwapOffsetY = -BLOCK_HEIGHT;
-      master->LineCheck = TRUE;
+      master->LineCheck = true;
       if (target != 0) {
         target->SwapSide = SWAP_SLAVE;
         target->SwapTimer = 3;
         target->SwapOffsetX = 0;
         target->SwapOffsetY = -BLOCK_HEIGHT;
-        target->LineCheck = TRUE;
+        target->LineCheck = true;
       }
       class->UA.SwapTimer = 3;
       class->UA.SwapOffsetX = 0;
@@ -455,13 +442,13 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
     master->SwapTimer = 3;
     master->SwapOffsetX = 0;
     master->SwapOffsetY = -BLOCK_HEIGHT;
-    master->LineCheck = TRUE;
+    master->LineCheck = true;
     if (target != 0) {
       target->SwapSide = SWAP_SLAVE;
       target->SwapTimer = 3;
       target->SwapOffsetX = 0;
       target->SwapOffsetY = BLOCK_HEIGHT;
-      target->LineCheck = TRUE;
+      target->LineCheck = true;
     }
     class->UA.SwapTimer = 3;
     class->UA.SwapOffsetX = 0;
@@ -476,13 +463,13 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
     master->SwapTimer = 3;
     master->SwapOffsetX = BLOCK_WIDTH;
     master->SwapOffsetY = 0;
-    master->LineCheck = TRUE;
+    master->LineCheck = true;
     if (target != 0) {
       target->SwapSide = SWAP_SLAVE;
       target->SwapTimer = 3;
       target->SwapOffsetX = -BLOCK_WIDTH;
       target->SwapOffsetY = 0;
-      target->LineCheck = TRUE;
+      target->LineCheck = true;
     }
     class->UA.SwapTimer = 3;
     class->UA.SwapOffsetX = BLOCK_WIDTH;
@@ -497,13 +484,13 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
     master->SwapTimer = 3;
     master->SwapOffsetX = -BLOCK_WIDTH;
     master->SwapOffsetY = 0;
-    master->LineCheck = TRUE;
+    master->LineCheck = true;
     if (target != 0) {
       target->SwapSide = SWAP_SLAVE;
       target->SwapTimer = 3;
       target->SwapOffsetX = BLOCK_WIDTH;
       target->SwapOffsetY = 0;
-      target->LineCheck = TRUE;
+      target->LineCheck = true;
     }
     class->UA.SwapTimer = 3;
     class->UA.SwapOffsetX = -BLOCK_WIDTH;
@@ -513,7 +500,7 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
   /* - 移動完了 */
   class->GameStep = STEP_SWAP;
 
-  return(TRUE);
+  return true;
 }
 
 
@@ -529,20 +516,18 @@ int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
 /* ---------------------------------------- */
 void SetBlock(TPuzzleBase *class)
 {
-  int  i;
-
   /* --- フィールド配列クリア */
-  for(i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+  for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     class->Field[i] = 0;
   }
   /* --- スタート時に色が揃っていないように */
   /* == 取り敢えず後回し (^^; */
   /* --- 初期ブロックを置く */
-  for(i=0; i<(FIELD_WIDTH * 4); i++) {
+  for(int i=0; i<(FIELD_WIDTH * 4); i++) {
     class->Field[i] = GetBlock(class);
     class->Field[i]->Color = GetBlockColor(class) + 1;
-    class->Field[i]->LineCheck = TRUE;
-    class->Field[i]->LineBlock = FALSE;
+    class->Field[i]->LineCheck = true;
+    class->Field[i]->LineBlock = false;
   }
 }
 
@@ -552,17 +537,14 @@ void SetBlock(TPuzzleBase *class)
 /* ---------------------------------------- */
 Block *GetBlock(TPuzzleBase *class)
 {
-  Block *b;
-  int  i;
-
-  b = 0;
-  for(i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+  Block *b = 0;
+  for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     if (class->Item[i].Color == 0) {
       b = &(class->Item[i]);
       break;
     }
   }
-  return(b);
+  return b;
 }
 
 
@@ -571,13 +553,11 @@ Block *GetBlock(TPuzzleBase *class)
 /* ---------------------------------------- */
 int  GetBlockColor(TPuzzleBase *class)
 {
-  int  c;
-
   /* - ブロックカラーはランダム */
   /* === いずれはアイテム混ぜの調整など */
-  c = rand() % class->ColorNum;
+  int c = rand() % class->ColorNum;
   /* - おわり */
-  return(class->BlockColor[c]);
+  return class->BlockColor[c];
 }
 
 
@@ -604,10 +584,10 @@ void  PopupNext(TPuzzleBase *class)
     class->Field[i]->Color = GetBlockColor(class) + 1;
     class->Field[i]->PopupTimer = 4;
     class->Field[i]->PopupOffset = BLOCK_HEIGHT;
-    class->Field[i]->LineCheck = TRUE;
+    class->Field[i]->LineCheck = true;
   }
   /* --- つかみアクションの途中であったらカーソルも移動 */
-  if (class->UA.HaveBlock == TRUE) {
+  if (class->UA.HaveBlock) {
     class->UA.Y = class->UA.Y + 1;
     class->UA.PopupTimer = 4;
     class->UA.PopupOffset = BLOCK_HEIGHT;
@@ -618,22 +598,20 @@ void  PopupNext(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- ネクストの迫り上がりカウントとオフセット */
 /* -------------------------------------------- */
-int  PopupWork(TPuzzleBase *class)
+bool PopupWork(TPuzzleBase *class)
 {
-  int  r, i;
-
-  r = FALSE;
+  bool r = false;
   /* --- せり上がりオフセット */
-  for(i=0; i<ALL_BLOCK; i++) {
+  for(int i=0; i<ALL_BLOCK; i++) {
     if (class->Item[i].Color != 0) {
       if (class->Item[i].PopupTimer != 0) {
         class->Item[i].PopupTimer = class->Item[i].PopupTimer - 1;
         class->Item[i].PopupOffset = class->Item[i].PopupOffset - 6;
         if ((class->Item[i].PopupOffset < 0) ||
-	    (class->Item[i].PopupTimer == 0)) {
+          (class->Item[i].PopupTimer == 0)) {
           class->Item[i].PopupOffset = 0;
-          r = TRUE;
-	}
+          r = true;
+        }
       }
     }
   }
@@ -654,7 +632,7 @@ int  PopupWork(TPuzzleBase *class)
     class->NextTimer = class->NextInterval;
     /* -- ゲームオーバー判定 */
     if (FieldHeight(class) == 0) {
-      class->GameOver = TRUE;
+      class->GameOver = true;
     }
     else {
       /* -- ネクスト迫り上がり */
@@ -666,7 +644,7 @@ int  PopupWork(TPuzzleBase *class)
     SoundSE(8);
   }
   /* --- せりあがり処理終了 */
-  return(r);
+  return r;
 }
 
 
@@ -675,38 +653,32 @@ int  PopupWork(TPuzzleBase *class)
 /* -------------------------------------------- */
 int  FieldHeight(TPuzzleBase *class)
 {
-  int  i, j, r;
-  int  hit;
-
-  r = 0;
-  for(i=0; i<FIELD_HEIGHT; i++) {
-    hit = FALSE;
-    for(j=0; j<FIELD_WIDTH; j++) {
+  int r = 0;
+  for(int i=0; i<FIELD_HEIGHT; i++) {
+    bool hit = false;
+    for(int j=0; j<FIELD_WIDTH; j++) {
       if (class->Field[(((FIELD_HEIGHT - 1) - i) * FIELD_WIDTH) + j] != 0) {
-        hit = TRUE;
+        hit = true;
       }
     }
-    if (hit == TRUE) {
+    if (hit) {
       r = i;
       break;
     }
   }
   /* - 戻り値 */
-  return(r);
+  return r;
 }
 
 
 /* -------------------------------------------- */
 /* --- フィールド内の最高位ブロックの位置を返す */
 /* -------------------------------------------- */
-int  MoveWork(TPuzzleBase *class)
+bool MoveWork(TPuzzleBase *class)
 {
-  int  i;
-  int  working;
-
-  working = FALSE;
+  bool working = false;
   /* --- フィールド内ブロックの移動 */
-  for(i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+  for(int i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     if (class->Field[i] != 0) {
       if (class->Field[i]->SwapTimer > 0) {
         class->Field[i]->SwapTimer = class->Field[i]->SwapTimer - 1;
@@ -714,15 +686,15 @@ int  MoveWork(TPuzzleBase *class)
           class->Field[i]->SwapSide = SWAP_NONE;
           class->Field[i]->SwapOffsetX = 0;
           class->Field[i]->SwapOffsetY = 0;
-	}
+        }
         else {
           class->Field[i]->SwapOffsetX = class->Field[i]->SwapOffsetX % 2;
           class->Field[i]->SwapOffsetY = class->Field[i]->SwapOffsetY % 2;
           if (class->Field[i]->SwapSide == SWAP_SLAVE) {
             class->Field[i]->SwapOffsetY = class->Field[i]->SwapOffsetY + SwapTable[class->Field[i]->SwapTimer];
-	  }
-	  working = TRUE;
-	}
+          }
+          working = true;
+        }
       }
     }
   }
@@ -739,72 +711,69 @@ int  MoveWork(TPuzzleBase *class)
     }
   }
   /* - おしまい */
-  return(working);
+  return working;
 }
 
 
 /* -------------------------------------------- */
 /* --- 落下ブロックの判定と落下リクエスト       */
 /* -------------------------------------------- */
-int  DropRequest(TPuzzleBase *class)
+bool DropRequest(TPuzzleBase *class)
 {
-  int i;
-  int position, t, working;
+  int position, t;
   Block *b;
 
-  working = FALSE;
-  for(i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+  bool working = false;
+  for(int i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     if (class->Field[i] != 0) {
       if (class->Field[i - FIELD_WIDTH] == 0) {
-        working = TRUE;
+        working = true;
         /* -- 下に無いのでどこまで落ちるかサーチ */
         position = i - FIELD_WIDTH;
         t = 0;
-	do {
+        do {
           if (class->Field[position] != 0) break;
           position = position - FIELD_WIDTH;
           t = t + 1;
         } while(!(position < FIELD_WIDTH));
         /* -- 落下設定 */
         position = position + FIELD_WIDTH;
-	b = class->Field[i];
-	b->LineCheck = TRUE;
-	b->DropCheck = TRUE;
-	b->DropTimer = 2 * t;
-	b->DropOffset = 24 * t;
+        b = class->Field[i];
+        b->LineCheck = true;
+        b->DropCheck = true;
+        b->DropTimer = 2 * t;
+        b->DropOffset = 24 * t;
         class->Field[position] = b;
         class->Field[i] = 0;
       }
     }
   }
-  return(working);
+  return working;
 }
 
 
 /* -------------------------------------------- */
 /* --- ブロックの落下                           */
 /* -------------------------------------------- */
-int  DropWork(TPuzzleBase *class)
+bool DropWork(TPuzzleBase *class)
 {
-  int  i, working;
-
-  working = FALSE;
-  for(i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+  bool working = false;
+  for(int i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     if (class->Field[i] != 0) {
       if (class->Field[i]->DropTimer > 0) {
-        working = TRUE;
+        working = true;
         class->Field[i]->DropTimer = class->Field[i]->DropTimer - 1;
         if (class->Field[i]->DropTimer == 0) {
           class->Field[i]->DropOffset = 0;
-	}
+        }
         else {
           class->Field[i]->DropOffset = class->Field[i]->DropOffset - 12;
-	}
+        }
       }
     }
   }
   /* - おしまい */
-  return(working);
+  return working;
 }
 
 
@@ -813,67 +782,59 @@ int  DropWork(TPuzzleBase *class)
 /* -------------------------------------------- */
 int  LineCheck(TPuzzleBase *class)
 {
-  int  i, j;
-  int  working;
-
-  working = 0;
-  for(j=1; j<FIELD_HEIGHT; j++) {
-    for(i=0; i<FIELD_WIDTH; i++) {
+  int working = 0;
+  for(int j=1; j<FIELD_HEIGHT; j++) {
+    for(int i=0; i<FIELD_WIDTH; i++) {
       if (class->Field[(j * FIELD_WIDTH) + i] != 0) {
-        if (class->Field[(j * FIELD_WIDTH) + i]->LineCheck == TRUE) {
-          class->Field[(j * FIELD_WIDTH) + i]->LineCheck = FALSE;
+        if (class->Field[(j * FIELD_WIDTH) + i]->LineCheck) {
+          class->Field[(j * FIELD_WIDTH) + i]->LineCheck = false;
           working = working + LineCount(class, i, j, 1, 0, 0);
           working = working + LineCount(class, i, j, 0, 1, 0);
-	}
+        }
       }
     }
   }
   /* --- おしまい */
-  return(working);
+  return working;
 }
 
 
 /* -------------------------------------------- */
 /* --- ブロックが揃って消えるエフェクト         */
 /* -------------------------------------------- */
-int  LineWork(TPuzzleBase *class)
+bool LineWork(TPuzzleBase *class)
 {
-  int  i, working, sound;
-
-  working = FALSE;
-  sound = FALSE;
-  for(i=FIELD_WIDTH;i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+  bool working = false;
+  bool sound = false;
+  for(int i=FIELD_WIDTH;i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
     if (class->Field[i] != 0) {
       if (class->Field[i]->LineTimer > 0) {
         if (class->Field[i]->LineTimer == 10) {
-          sound = TRUE;
-	}
-	working = TRUE;
-	class->Field[i]->LineTimer = class->Field[i]->LineTimer - 1;
-	if (class->Field[i]->LineTimer == 0) {
-	  class->Field[i]->Color = 0;
-	  class->Field[i]->LineBlock = FALSE;
-	  class->Field[i]->LineCheck = FALSE;
-	  class->Field[i] = 0;
-	}
+          sound = true;
+        }
+        working = true;
+        class->Field[i]->LineTimer = class->Field[i]->LineTimer - 1;
+        if (class->Field[i]->LineTimer == 0) {
+          class->Field[i]->Color = 0;
+          class->Field[i]->LineBlock = false;
+          class->Field[i]->LineCheck = false;
+          class->Field[i] = 0;
+        }
       }
     }
   }
-  if (sound == TRUE) {
+  if (sound) {
     SoundSE(6);
   }
   /* - おしまい */
-  return(working);
+  return working;
 }
 
 
 /* -------------------------------------------- */
 /* --- ブロック揃いのカウント                   */
 /* -------------------------------------------- */
-int  LineCount(TPuzzleBase *class,
-	       int x, int y,
-	       int dx, int dy,
-	       int layer)
+int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer)
 {
   int  col, nextcol;
   int  score, ready;
@@ -881,13 +842,13 @@ int  LineCount(TPuzzleBase *class,
   score = 0;
   ready = 0;
   col = class->Field[x + (y * FIELD_WIDTH)]->Color;
-  if (class->Field[x + (y * FIELD_WIDTH)]->LineBlock == TRUE) {
+  if (class->Field[x + (y * FIELD_WIDTH)]->LineBlock) {
     ready = ready + 1;
   }
   do {
     if (layer == 2) {
       if (class->Field[x + (y * FIELD_WIDTH)] != 0) {
-	class->Field[x + (y * FIELD_WIDTH)]->LineBlock = TRUE;
+	class->Field[x + (y * FIELD_WIDTH)]->LineBlock = true;
 	class->Field[x + (y * FIELD_WIDTH)]->LineTimer = 15;
       }
     }
@@ -910,7 +871,7 @@ int  LineCount(TPuzzleBase *class,
     score = score + 1;
     if (col == nextcol) {
       if (class->Field[x + (y * FIELD_WIDTH)] != 0) {
-        if (class->Field[x + (y * FIELD_WIDTH)]->LineBlock == TRUE) {
+        if (class->Field[x + (y * FIELD_WIDTH)]->LineBlock) {
           ready = ready + 1;
 	}
       }
@@ -946,4 +907,3 @@ int  LineCount(TPuzzleBase *class,
 
   return(score);
 }
-

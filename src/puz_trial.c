@@ -43,7 +43,7 @@
 /* local function                */
 /*-------------------------------*/
 
-void  ChangeCharacter(TPuzzleTrial *class, int level);
+void ChangeCharacter(TPuzzleTrial *class, int level);
 
 /*-------------------------------*/
 /* data table                    */
@@ -64,7 +64,7 @@ TPuzzleTrial *TPuzzleTrial_Create(TGameScreen *scr, int level)
   class = malloc(sizeof(TPuzzleTrial));
   /* --- クラスメンバー初期化 */
   class->step = TInit;
-  class->status = TRUE;
+  class->status = true;
   class->screen = scr;
   class->game_level = level;
   /* --- テクスチャー読み込み */
@@ -80,7 +80,7 @@ TPuzzleTrial *TPuzzleTrial_Create(TGameScreen *scr, int level)
   return(class);
 }
 
-void  TPuzzleTrial_Destroy(TPuzzleTrial *class)
+void TPuzzleTrial_Destroy(TPuzzleTrial *class)
 {
   /* --- スーパークラスの解放 */
   TPuzzleDisp_Destroy(class->super);
@@ -115,15 +115,13 @@ void TPuzzleTrial_LoadTexture(TPuzzleTrial *class)
 /* ---------------------------------------- */
 /* --- ゲーム実行中かどうかを返すフラグ     */
 /* ---------------------------------------- */
-int TPuzzleTrial_GameStat(TPuzzleTrial *class)
+bool TPuzzleTrial_GameStat(TPuzzleTrial *class)
 {
-  int  r;
-
-  r = TRUE;
   if (class->step == TEnd) {
-    r = FALSE;
+    return false;
   }
-  return(r);
+
+  return true;
 }
 
 
@@ -166,7 +164,7 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
   case TGame:
     TPuzzleTrial_UserControl(class);
     TPuzzleBase_GameExec(class->super->super);
-    if (TPuzzleBase_LevelCheck(class->super->super) == TRUE) {
+    if (TPuzzleBase_LevelCheck(class->super->super)) {
       /* --- レベルアップ時アトラクト */
       TPuzzleBase_GameLevel(class->super->super,
 			    class->super->super->Level);
@@ -178,7 +176,7 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     }
     TPuzzleDisp_DispField(class->super);
     /* - ゲームオーバーで次に */
-    if (class->super->super->GameOver == TRUE) {
+    if (class->super->super->GameOver) {
       SoundMusicStop();
       SoundSE(7);
       class->readytimer = 0;
@@ -214,7 +212,7 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     i = InputJoyKeyTriger(0);
     class->readytimer = class->readytimer + 1;
     if (class->readytimer > 160) {
-      if ((i & (IN_Button1|IN_Button2|IN_Button3|IN_Button4|IN_GP_START)) != 0) {
+      if ((i & (IN_Button1|IN_Button2|IN_Button3|IN_Button4|IN_Button7)) != 0) {
 	class->step = TEnd;
         if (class->readytimer > 320) {
           SoundMusicStop();
@@ -245,18 +243,18 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
     return;
   }
   /* --- 入力とホールド */
-  class->super->super->UA.HaveBlock = FALSE;
+  class->super->super->UA.HaveBlock = false;
   inp = InputJoyKey(0);
-  if (((inp & (IN_Button1|IN_Button2|IN_Button3|IN_Button4|IN_Button5|IN_Button6)) != 0) && (class->super->super->Animation == FALSE)) {
+  if (((inp & (IN_Button1|IN_Button2|IN_Button3|IN_Button4|IN_Button5|IN_Button6)) != 0) && (!class->super->super->Animation)) {
     /* -- 現在のカーソル位置にブロックはあるか */
     if (class->super->super->Field[class->super->super->UA.X + (class->super->super->UA.Y * FIELD_WIDTH)] != 0) {
-      class->super->super->UA.HaveBlock = TRUE;
+      class->super->super->UA.HaveBlock = true;
     }
   }
   /* --- 入力とカーソル移動 */
   inp = InputJoyKeyTriger(0);
   if (((inp & IN_Up) != 0) && (class->super->super->UA.Y < (FIELD_HEIGHT -1))) {
-    if (class->super->super->UA.HaveBlock == TRUE) {
+    if (class->super->super->UA.HaveBlock) {
       TPuzzleBase_MoveRequest(class->super->super,
 			      class->super->super->UA.X,
 			      class->super->super->UA.Y,
@@ -265,7 +263,7 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
     class->super->super->UA.Y = class->super->super->UA.Y + 1;
   }
   if (((inp & IN_Down) != 0) && (class->super->super->UA.Y > 1)) {
-    if (class->super->super->UA.HaveBlock == TRUE) {
+    if (class->super->super->UA.HaveBlock) {
       TPuzzleBase_MoveRequest(class->super->super,
 			      class->super->super->UA.X,
 			      class->super->super->UA.Y,
@@ -274,7 +272,7 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
     class->super->super->UA.Y = class->super->super->UA.Y - 1;
   }
   if (((inp & IN_Left) != 0) && (class->super->super->UA.X > 0)) {
-    if (class->super->super->UA.HaveBlock == TRUE) {
+    if (class->super->super->UA.HaveBlock) {
       TPuzzleBase_MoveRequest(class->super->super,
 			      class->super->super->UA.X,
 			      class->super->super->UA.Y,
@@ -283,7 +281,7 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
     class->super->super->UA.X = class->super->super->UA.X - 1;
   }
   if (((inp & IN_Right) != 0) && (class->super->super->UA.X < (FIELD_WIDTH -1))) {
-    if (class->super->super->UA.HaveBlock == TRUE) {
+    if (class->super->super->UA.HaveBlock) {
       TPuzzleBase_MoveRequest(class->super->super,
 			      class->super->super->UA.X,
 			      class->super->super->UA.Y,
@@ -303,7 +301,7 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
 /* ---------------------------------------- */
 /* --- キャラクター変更                     */
 /* ---------------------------------------- */
-void  ChangeCharacter(TPuzzleTrial *class, int level)
+void ChangeCharacter(TPuzzleTrial *class, int level)
 {
   SDL_Surface  *texkey;
 

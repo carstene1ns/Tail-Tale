@@ -20,19 +20,12 @@
 /* include                       */
 /*-------------------------------*/
 
+#include <stdbool.h>
 #include <SDL.h>
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
 
 /*-------------------------------*/
 /* struct                        */
@@ -41,12 +34,10 @@
 typedef struct {
   int  TextureId;
   /* - public */
-  int  DispSw;
+  bool DispSw;
   int  x, y;
   int  w, h;
   int  tx, ty;
-  float  zoomx, zoomy;
-  float  rotation_z;
   unsigned char  alpha;
   SDL_Surface  *Texture;
 } TGameSprite, *PTGameSprite;
@@ -55,12 +46,9 @@ typedef struct {
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
-TGameSprite *TGameSprite_Create(void);
+TGameSprite *TGameSprite_Create();
 void TGameSprite_Destroy(TGameSprite *class);
-
-void TGameSprite_SetTextureDirect(TGameSprite *class,
-				  int  texture_id,
-				  SDL_Surface *bitmap);
-
+void TGameSprite_SetTextureDirect(TGameSprite *class, int  texture_id,
+                                  SDL_Surface *bitmap);
 
 #endif //GRP_SPRITE_H

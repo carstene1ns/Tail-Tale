@@ -26,27 +26,17 @@
 /* define                        */
 /*-------------------------------*/
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 /* --- 表示関係の定数 */
 #define OBJMAX   186
 #define TEXMAX   5
 #define FIELDTOP 4
 #define KIRAMAX  36
 
-
 enum GameMode {
   MODE_CHALLENGE,
   MODE_1P,
   MODE_2P
 };
-
 
 /*-------------------------------*/
 /* struct                        */
@@ -56,7 +46,7 @@ enum GameMode {
 /* --- きらきらエフェクト */
 typedef struct {
   /* - 表示スイッチ */
-  int  DispSw;
+  bool  DispSw;
   /* - 表示オブジェクトの保持 */
   TGameSprite *obj;
   /* - 表示時間タイマー */
@@ -102,21 +92,16 @@ typedef struct {
   int  disptimer;
 } TPuzzleDisp, *PTPuzzleDisp;
 
-
 /* ---------------------------------------------- */
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
 TPuzzleDisp *TPuzzleDisp_Create(int  mode, int level, TGameScreen *scr);
 void TPuzzleDisp_Destroy(TPuzzleDisp *class);
-
 void TPuzzleDisp_DispField(TPuzzleDisp *class);
 void TPuzzleDisp_DispReady(TPuzzleDisp *class, int time);
 void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time);
 void TPuzzleDisp_DispClear(TPuzzleDisp *class);
-void TPuzzleDisp_KiraRequest(TPuzzleDisp *class,
-			     int x, int y, int l);
-
-
+void TPuzzleDisp_KiraRequest(TPuzzleDisp *class, int x, int y, int l);
 
 #endif //PUZ_DISP_H

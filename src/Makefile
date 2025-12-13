@@ -6,7 +6,7 @@
 
 # - Windows with Cygwin
 PCCC     = gcc
-PCCFLAGS = -DNOTPSP -D__GP2X_SCREEN__
+PCCFLAGS = 
 PCLIBS   = -lSDL_mixer -lm -lSDL_image -lpng -lz -lsmpeg -lvorbis -logg -ljpeg
 PCINCLUDE = -I/usr/local/mingw32/include
 PCSDLCONFIG = /usr/local/mingw32/bin/sdl-config
@@ -16,7 +16,7 @@ GPTOOLCHAIN = /opt/crosstool/gcc-3.4.1-glibc-2.3.3/arm-linux/bin
 GPCC     = $(GPTOOLCHAIN)/arm-linux-gcc
 GPCXX    = $(GPTOOLCHAIN)/arm-linux-g++
 GPSTRIP  = $(GPTOOLCHAIN)/arm-linux-strip
-GPCFLAGS = -DNOTPSP -D__GP2X__ -D__GP2X_SCREEN__
+GPCFLAGS = -D__GP2X__
 GPLIBS   = -lSDL_mixer -lm -lSDL_image -lpng -lz -ljpeg -lmad -lvorbisidec -lmikmod 
 GPINCLUDE = -I/opt/theoddbot-libs-open2x-soft-float/usr/include
 GPSDLCONFIG = /opt/theoddbot-libs-open2x-soft-float/usr/bin/sdl-config
@@ -27,7 +27,7 @@ GCW0TOOLCHAIN = /opt/gcw0-toolchain/usr/bin
 GCW0CC     = $(GCW0TOOLCHAIN)/mipsel-linux-gcc
 GCW0CXX    = $(GCW0TOOLCHAIN)/mipsel-linux-g++
 GCW0STRIP  = $(GCW0TOOLCHAIN)/mipsel-linux-strip
-GCW0CFLAGS = -DNOTPSP -D__GCW02X__ -D__GCW02X_SCREEN__ -DGCW0
+GCW0CFLAGS = -D__GCW02X__ -D__GCW02X_SCREEN__ -DGCW0
 GCW0LIBS   = `/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/bin/sdl-config --libs` -lSDL_mixer -lm -lSDL_image -lpng -lz -ljpeg -lvorbisidec
 GCW0INCLUDE = -I/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/include
 GCW0SDLCONFIG = /opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/bin/sdl-config

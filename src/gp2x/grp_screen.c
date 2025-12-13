@@ -32,8 +32,6 @@
 #include <stdlib.h>
 
 #include "grp_screen.h"
-#include "grp_table_int.h"
-
 #include "debug.h"
 
 
@@ -47,8 +45,6 @@
 
 /* --- スプライトを一枚スクリーンに貼り付ける */
 void Render(TGameScreen *class, TGameSprite *spr);
-void RenderZoomRot(TGameScreen *class, TGameSprite *spr);
-
 
 /* -------------------------------------------------------------- */
 /* --- スクリーン管理クラス                                       */
@@ -127,19 +123,11 @@ void TGameScreen_DispScreen(TGameScreen *class)
 
   /* --- スプライト描画 */
   for(i=0; i<SPRITEMAX; i++) {
-    if ((class->Sprites[i]->DispSw == TRUE) &&
-	(class->Sprites[i]->Texture != NULL)) {
+    if (class->Sprites[i]->DispSw &&
+      (class->Sprites[i]->Texture != NULL)) {
       /* --- スプライトの描画 */
-      if ((class->Sprites[i]->zoomx == 1.0) &&
-	  (class->Sprites[i]->zoomy == 1.0) &&
-	  (class->Sprites[i]->rotation_z == 0.0)) {
-	/* 回転拡大縮小なし、単純矩形コピー */
-	Render(class, class->Sprites[i]);
-      }
-      else {
-	/* 回転拡大縮小あり */
-	RenderZoomRot(class, class->Sprites[i]);
-      }
+      /* 回転拡大縮小なし、単純矩形コピー */
+      Render(class, class->Sprites[i]);
     }
   }
 }
@@ -168,14 +156,14 @@ void TGameScreen_LoadTexture(TGameScreen *class,
 			     int num,
 			     char *filename)
 {
-  TGameTexture_Load(class->Texture, num, filename, class->Screen, TRUE);
+  TGameTexture_Load(class->Texture, num, filename, class->Screen, true);
 }
 
 void TGameScreen_LoadTexturePure(TGameScreen *class,
 				 int num,
 				 char *filename)
 {
-  TGameTexture_Load(class->Texture, num, filename, class->Screen, FALSE);
+  TGameTexture_Load(class->Texture, num, filename, class->Screen, false);
 }
 
 
@@ -207,8 +195,8 @@ void Render(TGameScreen *class, TGameSprite *spr)
   int  r;
 
   /* --- 表示スイッチ */
-  if (spr->DispSw == FALSE) return;
-  if (spr->Texture == NULL) return;
+  if (!spr->DispSw) return;
+  if (!spr->Texture) return;
 
   /* --- 表示範囲 */
   rect1.w = spr->w;
@@ -232,107 +220,4 @@ void Render(TGameScreen *class, TGameSprite *spr)
   if (org_alpha != spr->alpha) {
     SDL_SetAlpha(spr->Texture, SDL_SRCALPHA, org_alpha);
   }
-}
-
-
-/* ---------------------------------------- */
-/* --- スプライトの表示(回転拡大縮小あり) */
-void RenderZoomRot(TGameScreen *class, TGameSprite *spr)
-{
-  SDL_Surface  *after;
-  SDL_Rect  rect1, rect2;
-  int  pp_x, pp_y;
-  int  pp_dw_x, pp_dh_x, pp_dw_y, pp_dh_y;
-  int  fw, fh, rzoomx, rzoomy;
-  int  max_w, max_h, max_w_int, max_h_int;
-  int  step_x, step_y;
-  int  rot;
-  int  loop_x, loop_y;
-  int  ix, iy;
-  int  fb_width, tx_width;
-  unsigned short *dstpix, *srcpix;
-    
-
-  /* --- 表示スイッチ */
-  if (spr->DispSw == FALSE) return;
-  if (spr->Texture == NULL) return;
-
-  /* --- 回転拡大前処理 */
-  rot = (int)spr->rotation_z;
-  rot %= 360;
-  /* ピクセルステップ */
-  rzoomx = (1024*1024) / (int)(spr->zoomx * 1024);
-  rzoomy = (1024*1024) / (int)(spr->zoomy * 1024);
-  pp_dw_x = (rzoomx * sprite_cos[rot]) / 1024;
-  pp_dh_x = (rzoomx * sprite_sin[rot]) / 1024;
-  pp_dw_y = -(rzoomy * sprite_sin[rot]) / 1024;
-  pp_dh_y = (rzoomy * sprite_cos[rot]) / 1024;
-  /* 回転後の画像の大きさ */
-  if (rot != 0) {
-    max_w = (spr->w * (int)(spr->zoomx * 1448));
-    max_h = (spr->h * (int)(spr->zoomy * 1448));
-  }
-  else {
-    max_w = spr->w * (int)(spr->zoomx * 1024);
-    max_h = spr->h * (int)(spr->zoomy * 1024);
-  }
-  if (max_w > max_h) max_h = max_w;
-  if (max_h > max_w) max_w = max_h;
-  max_w_int = max_w >> 10;
-  max_h_int = max_h >> 10;
-  after = SDL_CreateRGBSurface(SDL_SWSURFACE,
-			       max_w_int, max_h_int, 16,
-			       class->Screen->format->Rmask,
-			       class->Screen->format->Gmask,
-			       class->Screen->format->Bmask,
-			       class->Screen->format->Amask);
-  //SDL_FillRect(after, 0, 0x00000000);
-  /* 開始点 */
-  fw = -(max_w_int) * rzoomx / 2;
-  fh = -(max_h_int) * rzoomy / 2;
-  pp_x = ((fw * sprite_cos[rot]) - (fh * sprite_sin[rot])) / 1024;
-  pp_y = ((fw * sprite_sin[rot]) + (fh * sprite_cos[rot])) / 1024;
-  pp_x += (spr->w >> 1) * 1024;
-  pp_y += (spr->h >> 1) * 1024;
-  fb_width = after->w + (after->w % 2);
-  tx_width = spr->Texture->w + (spr->Texture->w % 2);
-
-  /* --- 回転転送処理 */
-  for(loop_y=0; loop_y<max_h_int; loop_y++) {
-    dstpix = (unsigned short *)after->pixels;
-    dstpix += (fb_width * loop_y);
-    step_x = pp_x;
-    step_y = pp_y;
-    for(loop_x=0; loop_x<max_w_int; loop_x++) {
-      if ((step_x >= 0) && (step_x < (spr->w << 10)) &&
-	  (step_y >= 0) && (step_y < (spr->h << 10))) {
-	ix = step_x >> 10;
-	iy = step_y >> 10;
-	srcpix = (unsigned short *)spr->Texture->pixels;
-	srcpix += (spr->tx + ix + ((spr->ty + iy) * tx_width));
-	*dstpix = *srcpix;
-      }
-      else {
-	*dstpix = 0;
-      }
-      step_x += pp_dw_x;
-      step_y += pp_dh_x;
-      dstpix += 1;
-    }
-    pp_x += pp_dw_y;
-    pp_y += pp_dh_y;
-  }
-
-  /* --- スクリーンに描画 */
-  rect1.w = after->w;
-  rect1.h = after->h;
-  rect2.w = after->w;
-  rect2.h = after->h;
-  rect1.x = 0;
-  rect1.y = 0;
-  rect2.x = spr->x + (spr->w / 2) - (after->w / 2);
-  rect2.y = spr->y + (spr->h / 2) - (after->h / 2);
-  SDL_BlitSurface(after, &rect1, class->Screen, &rect2);
-  /* あとしまつ */
-  SDL_FreeSurface(after);
 }

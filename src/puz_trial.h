@@ -19,7 +19,7 @@
 /*-------------------------------*/
 /* include                       */
 /*-------------------------------*/
-
+#include <stdbool.h>
 #include "grp_screen.h"
 #include "puz_base.h"
 #include "puz_disp.h"
@@ -29,14 +29,6 @@
 /* define                        */
 /*-------------------------------*/
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 enum TrialStep {
   TInit,
   TReady,
@@ -45,7 +37,6 @@ enum TrialStep {
   TGameover,
   TEnd
 };
-
 
 /*-------------------------------*/
 /* struct                        */
@@ -57,7 +48,7 @@ typedef struct {
   /* - 親クラス */
   TPuzzleDisp  *super;
   /* - ゲーム状態 */
-  int  status;
+  bool  status;
 
   /* - ゲーム画面 */
   TGameScreen  *screen;
@@ -71,18 +62,15 @@ typedef struct {
 
 } TPuzzleTrial, *PTPuzzleTrial;
 
-
 /* ---------------------------------------------- */
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
 TPuzzleTrial *TPuzzleTrial_Create(TGameScreen *scr, int level);
 void TPuzzleTrial_Destroy(TPuzzleTrial *class);
-
 void TPuzzleTrial_LoadTexture(TPuzzleTrial *class);
 void TPuzzleTrial_GameMain(TPuzzleTrial *class);
-int TPuzzleTrial_GameStat(TPuzzleTrial *class);
+bool TPuzzleTrial_GameStat(TPuzzleTrial *class);
 void TPuzzleTrial_UserControl(TPuzzleTrial *class);
 
-
-#endif //PUZ_DISP_H
+#endif //PUZ_TRIAL_H

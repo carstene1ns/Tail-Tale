@@ -20,31 +20,24 @@
 /* include                       */
 /*-------------------------------*/
 
+#include <stdbool.h>
+
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 /* --- ブロックサイズ */
 #define BLOCK_WIDTH  24
-#define BLOCK_HEIGHT  24
+#define BLOCK_HEIGHT 24
 
 /* --- フィールドサイズ */
 #define FIELD_WIDTH  8
 /* Next 込み */
-#define FIELD_HEIGHT  10
-#define ALL_BLOCK  (FIELD_WIDTH * FIELD_HEIGHT)
+#define FIELD_HEIGHT 10
+#define ALL_BLOCK (FIELD_WIDTH * FIELD_HEIGHT)
 
 /* --- 何個で消えるか */
-#define  LINE_LENGTH  4
-
+#define LINE_LENGTH  4
 
 enum GamePhase {
   STEP_PAUSE,
@@ -78,8 +71,6 @@ enum GameLevel {
   LevelHard
 };
 
-
-
 /*-------------------------------*/
 /* struct                        */
 /*-------------------------------*/
@@ -88,9 +79,9 @@ typedef struct {
   /* --- ブロックの種類(0で存在せず) */
   int  Color;
   /* --- 揃い判定を行うか否かのフラグ */
-  int  LineCheck;
+  bool  LineCheck;
   /* --- 揃ったブロックであるフラグ */
-  int  LineBlock;
+  bool  LineBlock;
   /* --- 揃ってきえるtimer */
   int  LineTimer;
   /* --- せり上げtimer */
@@ -98,7 +89,7 @@ typedef struct {
   /* --- せり上げ位置オフセット*/
   int  PopupOffset;
   /* --- 落下するブロックであることのフラグ */
-  int  DropCheck;
+  bool  DropCheck;
   /* --- 落下するアニメーションのtimer */
   int  DropTimer;
   /* --- 落下するアニメーションのオフセット */
@@ -118,7 +109,7 @@ typedef struct {
   int  X;
   int  Y;
   /* --- ブロックをつかんでいるか否か */
-  int  HaveBlock;
+  bool  HaveBlock;
   /* --- 入れ替えアクションtimer */
   int  SwapTimer;
   /* --- 入れ替えアクション位置オフセット */
@@ -154,7 +145,7 @@ typedef struct {
   /* - キャラクターカラー(ブロックの色に影響) */
   int  CharaColor;
   /* - アニメーションフラグ(全体の動きが止まっていたらfalse) */
-  int  Animation;
+  bool  Animation;
   /* - ブロックを消した総数 */
   int  EraseBlock;
   /* - 今回消したブロックによる得点 */
@@ -164,7 +155,7 @@ typedef struct {
   /* - 連鎖回数 */
   int  Combo;
   /* - ゲームオーバーフラグ */
-  int  GameOver;
+  bool  GameOver;
   /* - ゲーム全体の難易度  */
   int  Difficult;
 } TPuzzleBase, *PTPuzzleBase;
@@ -175,16 +166,11 @@ typedef struct {
 
 TPuzzleBase *TPuzzleBase_Create(int difficult);
 void TPuzzleBase_Destroy(TPuzzleBase *class);
-
 void TPuzzleBase_GameInit(TPuzzleBase *class, int col);
 void TPuzzleBase_GameExec(TPuzzleBase *class);
 void TPuzzleBase_GamePause(TPuzzleBase *class, int mode);
 void TPuzzleBase_GameLevel(TPuzzleBase *class, int lset);
-int  TPuzzleBase_LevelCheck(TPuzzleBase *class);
-int  TPuzzleBase_MoveRequest(TPuzzleBase *class,
-			     int posx, int posy,
-			     int dir);
+bool TPuzzleBase_LevelCheck(TPuzzleBase *class);
+bool TPuzzleBase_MoveRequest(TPuzzleBase *class, int posx, int posy, int dir);
 
-
-
-#endif //GRP_SPRITE_H
+#endif //PUZ_BASE_H

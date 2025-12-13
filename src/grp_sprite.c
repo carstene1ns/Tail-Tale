@@ -29,10 +29,8 @@
 /*-------------------------------*/
 
 #include <stdlib.h>
-
 #include <SDL.h>
 #include "grp_sprite.h"
-
 
 /*-------------------------------*/
 /* local value                   */
@@ -53,19 +51,15 @@ TGameSprite *TGameSprite_Create(void)
   TGameSprite *class;
 
   class = malloc(sizeof(TGameSprite));
-  if (class == NULL) {
-    return(0);
+  if (!class) {
+    return NULL;
   }
   class->Texture = NULL;
   class->TextureId = -1;
-  class->DispSw = FALSE;
-  class->zoomx = 1.0;
-  class->zoomy = 1.0;
-  class->rotation_z = 0.0;
+  class->DispSw = false;
 
-  return(class);
+  return class;
 }
-
 
 void TGameSprite_Destroy(TGameSprite *class)
 {
@@ -74,15 +68,13 @@ void TGameSprite_Destroy(TGameSprite *class)
   }
 }
 
-
 /* ---------------------------------------- */
 /* --- テクスチャーの登録                   */
 /* ---------------------------------------- */
-void TGameSprite_SetTextureDirect(TGameSprite *class,
-				  int  texture_id,
-				  SDL_Surface *bitmap)
+void TGameSprite_SetTextureDirect(TGameSprite *class, int  texture_id,
+                                  SDL_Surface *bitmap)
 {
-  if (class == NULL) return;
+  if (!class) return;
   class->TextureId = texture_id;
   class->Texture = bitmap;
 }

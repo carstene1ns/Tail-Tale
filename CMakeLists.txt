@@ -31,7 +31,6 @@ add_executable(tailtale WIN32
 	src/gamemain.c src/gamemain.h
 	src/grp_screen.c src/grp_screen.h
 	src/grp_sprite.c src/grp_sprite.h
-	src/grp_table.h src/grp_table_int.h
 	src/grp_texture.c src/grp_texture.h
 	src/input.c src/input.h
 	src/puz_base.c src/puz_base.h
@@ -44,7 +43,7 @@ set(DATA_PREFIX "data/" CACHE PATH "Where game data is located")
 
 # Define the compilation flags
 target_compile_options(tailtale PRIVATE -Wall)
-target_compile_definitions(tailtale PRIVATE NOTPSP DATA_PREFIX="${DATA_PREFIX}")
+target_compile_definitions(tailtale PRIVATE DATA_PREFIX="${DATA_PREFIX}")
 option(DEBUG_LOG "Print debug message" OFF)
 if(DEBUG_LOG)
 	target_compile_definitions(tailtale PRIVATE DEBUG)

@@ -30,13 +30,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#ifdef __MACOSX__
-#include <malloc/malloc.h>
-#else
-#include <malloc.h>
-#endif
-
 #include <SDL.h>
+#include <SDL_image.h>
 #include "grp_texture.h"
 
 /*-------------------------------*/
@@ -79,30 +74,28 @@
 /* --- コンストラクタ・デストラクタ         */
 TGameTexture *TGameTexture_Create(void)
 {
-  int  i;
   TGameTexture *class;
 
   class = malloc(sizeof(TGameTexture));
-  if (class == NULL) {
-    return(0);
+  if (!class) {
+    return NULL;
   }
-  for(i=0; i<TEXTUREMAX; i++) {
+  for(int i=0; i<TEXTUREMAX; i++) {
     class->texture_id = i;
     class->bitmap[i] = NULL;
   }
 
-  return(class);
+  return class;
 }
 
 void TGameTexture_Destroy(TGameTexture *class)
 {
-  int  i;
-  if (class == NULL) {
+  if (!class) {
     return;
   }
 
   /* ----- ロード中のテクスチャを解放する */
-  for(i=0; i<TEXTUREMAX; i++) {
+  for(int i=0; i<TEXTUREMAX; i++) {
     if (class->bitmap[i] != NULL) {
       SDL_FreeSurface(class->bitmap[i]);
       class->bitmap[i] = NULL;
@@ -117,11 +110,8 @@ void TGameTexture_Destroy(TGameTexture *class)
 /* ---------------------------------------- */
 /* --- テクスチャーの読み込み、登録         */
 /* ---------------------------------------- */
-void TGameTexture_Load(TGameTexture *class,
-		       int num,
-		       char *filename,
-                       SDL_Surface *GameScreen,
-                       int preconv)
+void TGameTexture_Load(TGameTexture *class, int num, char *filename,
+                       SDL_Surface *GameScreen, bool preconv)
 {
   SDL_Surface  *plane, *standard;
   void *nonalign;
@@ -135,7 +125,7 @@ void TGameTexture_Load(TGameTexture *class,
   loop = 0;
   pixdst = 0;
   pixsrc = 0;
-  if (class == NULL) {
+  if (!class) {
     return;
   }
 
@@ -158,24 +148,11 @@ void TGameTexture_Load(TGameTexture *class,
 #endif
 
   plane = IMG_Load(name);
-  if (plane == NULL) {
+  if (!plane) {
     class->bitmap[num] = NULL;
     return;
   }
-#ifdef NOTPSP
-  /* --- Normal SDL work for PC */
-  if (preconv == TRUE) {
-    class->bitmap[num] = SDL_ConvertSurface(plane,
-					    GameScreen->format,
-					    SDL_SWSURFACE);
-    if (plane != NULL) {
-      SDL_FreeSurface(plane);
-    }
-  }
-  else {
-    class->bitmap[num] = plane;
-  }
-#else
+#ifdef __PSP__
   /* --- PSP 向けにテクスチャを加工する */
 
   /* --- PSP で変換要求があった場合は16bitに落とす */
@@ -184,7 +161,7 @@ void TGameTexture_Load(TGameTexture *class,
   /* --- PSPではDMA転送で 16byte align に無いと都合が悪いので変換  */
   nonalign = class->bitmap[num]->pixels;
   msize = (class->bitmap[num]->w * class->bitmap[num]->h) * class->bitmap[num]->format->BytesPerPixel;
-  if ((preconv == TRUE) && (class->bitmap[num]->format->BytesPerPixel == 4)) {
+  if (preconv && (class->bitmap[num]->format->BytesPerPixel == 4)) {
     /* --- 16bit 減色して保持 */
     class->bitmap[num]->pixels = (void*)memalign(16, (msize / 2));
     msize = (class->bitmap[num]->w * class->bitmap[num]->h);
@@ -212,7 +189,19 @@ void TGameTexture_Load(TGameTexture *class,
     memcpy(class->bitmap[num]->pixels, nonalign, msize);
   }
   free(nonalign);
-
+#else
+  /* --- Normal SDL work for PC */
+  if (preconv) {
+    class->bitmap[num] = SDL_ConvertSurface(plane,
+              GameScreen->format,
+              SDL_SWSURFACE);
+    if (plane) {
+      SDL_FreeSurface(plane);
+    }
+  }
+  else {
+    class->bitmap[num] = plane;
+  }
 #endif
 }
 
@@ -220,12 +209,11 @@ void TGameTexture_Load(TGameTexture *class,
 /* ---------------------------------------- */
 /* --- テクスチャーの渡し                   */
 /* ---------------------------------------- */
-SDL_Surface  *TGameTexture_GetTexture(TGameTexture *class,
-				      int index)
+SDL_Surface  *TGameTexture_GetTexture(TGameTexture *class, int index)
 {
-
-  if (class == NULL) {
-    return(NULL);
+  if (!class) {
+    return NULL;
   }
-  return(class->bitmap[index]);
+
+  return class->bitmap[index];
 }

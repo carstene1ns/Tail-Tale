@@ -12,15 +12,12 @@
 /*     デバッグ用チェックルーチン                         */
 /*                                                        */
 /*--------------------------------------------------------*/
-/* -- $Id: debug.pp,v 1.3 2002/07/11 17:21:47 rero2 Exp $ */
-
 
 /*------------------------------------------------------------- */
 /** @file
     @brief		デバッグチェックルーチン
     @author		K.Kunikane (rerofumi)
     @since		Jul.27.2005
-    $Revision: 1.1.1.1 $
 */
 /*-----------------------------------------------------
  Copyright (C) 2002,2005 rerofumi <rero2@yuumu.org>
@@ -42,7 +39,7 @@
 /*-------------------------------*/
 
 /* ----- デバッグルーチンが有効か否か(ASCIIが準備出来てるか) */
-int  UseDebug;
+int UseDebug;
 
 /* ----- アスキーフォントテクスチャー */
 SDL_Surface *AsciiFont;
@@ -52,7 +49,7 @@ SDL_Surface *AsciiPlane;
 
 /* ----- 表示文字列 */
 char StockString[MessageMax][128];
-int  StockNum;
+int StockNum;
 
 /* ----- アスキーテクスチャー名 */
 #ifdef DATA_PREFIX
@@ -62,7 +59,7 @@ char *TextureName = "./data/ascii.bmp";
 #endif
 
 /* --- デバッグフォント文字列 */
-char  debug_line[128];
+char debug_line[128];
 
 
 /* -------------------------------------------------------------- */
@@ -71,7 +68,7 @@ char  debug_line[128];
 
 /* ---------------------------------------- */
 /* --- メッセージのライン表示    */
-void  print_msg(char *mes, int disp_x, int disp_y)
+void print_msg(char *mes, int disp_x, int disp_y)
 {
   int  i, l;
   int  c;
@@ -98,8 +95,7 @@ void  print_msg(char *mes, int disp_x, int disp_y)
 /* ---------------------------------------- */
 /* --- デバッグフェイス初期化               */
 /* ---------------------------------------- */
-void  TDebugInit(TGameScreen *screen,
-		 int Width, int Height, int Depth)
+void TDebugInit(TGameScreen *screen, int Width, int Height, int Depth)
 {
   SDL_Surface *plane;
 
@@ -141,7 +137,7 @@ void  TDebugInit(TGameScreen *screen,
 /* ---------------------------------------- */
 /* --- デバッグフェイス解放                 */
 /* ---------------------------------------- */
-void  TDebugFree()
+void TDebugFree()
 {
   SDL_FreeSurface(AsciiPlane);
   SDL_FreeSurface(AsciiFont);
@@ -152,7 +148,7 @@ void  TDebugFree()
 /* ---------------------------------------- */
 /* --- デバッグフェイスの定期描画           */
 /* ---------------------------------------- */
-void  TDebugDisp(TGameScreen *screen)
+void TDebugDisp(TGameScreen *screen)
 {
   int  disp_x, disp_y;
   int  disp_edge;
@@ -197,7 +193,7 @@ void  TDebugDisp(TGameScreen *screen)
 /* ---------------------------------------- */
 /* --- デバッグメッセージのキューイング     */
 /* ---------------------------------------- */
-void  TDebugPrint(char *mes)
+void TDebugPrint(char *mes)
 {
   if (StockNum < MessageMax) {
     strncpy(StockString[StockNum], mes, 127);
@@ -209,7 +205,7 @@ void  TDebugPrint(char *mes)
 /* ---------------------------------------- */
 /* --- 数字を文字列に変換                   */
 /* ---------------------------------------- */
-void  IntToStr(int num, char *buf)
+void IntToStr(int num, char *buf)
 {
   snprintf(buf, 127, "%d", num);
 }
@@ -218,8 +214,7 @@ void  IntToStr(int num, char *buf)
 /* ---------------------------------------- */
 /* --- 16進数表示用                         */
 /* ---------------------------------------- */
-void  IntToHex(int num, int length, char *buf)
+void IntToHex(int num, int length, char *buf)
 {
   snprintf(buf, 127, "%x", num);
 }
-

@@ -12,8 +12,6 @@
 /*     画面管理クラス                                     */
 /*                                                        */
 /*--------------------------------------------------------*/
-/* -- $Id: debug.pp,v 1.3 2002/07/11 17:21:47 rero2 Exp $ */
-
 
 /*------------------------------------------------------------- */
 /** @file
@@ -32,16 +30,12 @@
 
 #include <pspkernel.h>
 #include <pspdisplay.h>
-
 #include <pspgu.h>
 #include <pspgum.h>
-
 #include <stdlib.h>
 #include <malloc.h>
 
 #include "grp_screen.h"
-#include "grp_table.h"
-
 #include "debug.h"
 
 
@@ -82,8 +76,6 @@ struct SpriteVertex
 
 /* --- スプライトを一枚スクリーンに貼り付ける */
 void Render(TGameScreen *class, TGameSprite *spr);
-void RenderZoomRot(TGameScreen *class, TGameSprite *spr);
-
 
 /* -------------------------------------------------------------- */
 /* --- スクリーン管理クラス                                       */
@@ -206,7 +198,7 @@ void TGameScreen_DispScreen(TGameScreen *class)
 
   /* --- スプライト描画 */
   for(i=0; i<SPRITEMAX; i++) {
-    if ((class->Sprites[i]->DispSw == TRUE) &&
+    if (class->Sprites[i]->DispSw &&
 	(class->Sprites[i]->Texture != NULL)) {
       /* --- テクスチャの転送が必要なら */
       if ((class->Sprites[i]->TextureId != texture_cache) ||
@@ -232,16 +224,8 @@ void TGameScreen_DispScreen(TGameScreen *class)
 	sceGuTexOffset(0.0f,0.0f);
       }
       /* --- スプライトの描画 */
-      if ((class->Sprites[i]->zoomx == 1.0) &&
-	  (class->Sprites[i]->zoomy == 1.0) &&
-	  (class->Sprites[i]->rotation_z == 0.0)) {
-	/* 回転拡大縮小なし、単純矩形コピー */
-	Render(class, class->Sprites[i]);
-      }
-      else {
-	/* 回転拡大縮小あり */
-	RenderZoomRot(class, class->Sprites[i]);
-      }
+      /* 回転拡大縮小なし、単純矩形コピー */
+      Render(class, class->Sprites[i]);
     }
   }
 }
@@ -285,14 +269,14 @@ void TGameScreen_LoadTexture(TGameScreen *class,
 			     int num,
 			     char *filename)
 {
-  TGameTexture_Load(class->Texture, num, filename, 0, TRUE);
+  TGameTexture_Load(class->Texture, num, filename, 0, true);
 }
 
 void TGameScreen_LoadTexturePure(TGameScreen *class,
 				 int num,
 				 char *filename)
 {
-  TGameTexture_Load(class->Texture, num, filename, 0, FALSE);
+  TGameTexture_Load(class->Texture, num, filename, 0, false);
 }
 
 
@@ -325,8 +309,8 @@ void Render(TGameScreen *class, TGameSprite *spr)
   unsigned int  blendlevel;
 
   /* --- 表示スイッチ */
-  if (spr->DispSw == FALSE) return;
-  if (spr->Texture == NULL) return;
+  if (!spr->DispSw) return;
+  if (!spr->Texture) return;
 
   /* --- 半透明合成値 */
   blendlevel = ((spr->alpha & 0xff) << 24) | 0xffffff;
@@ -365,91 +349,3 @@ void Render(TGameScreen *class, TGameSprite *spr)
 		 GU_TEXTURE_16BIT|GU_COLOR_8888|GU_VERTEX_16BIT|GU_TRANSFORM_2D,
 		 (seg * 2), 0, vertices);
 }
-
-
-/* ---------------------------------------- */
-/* --- スプライトの表示(回転拡大縮小あり) */
-void RenderZoomRot(TGameScreen *class, TGameSprite *spr)
-{
-  struct SpriteVertex* vertices;
-  int  seg, pos, w_size, w_rest;
-  int  i, j;
-  unsigned int  blendlevel;
-  int  rot;
-  float  center_x, center_y;
-  float  fx, fy, rx, ry;
-
-  /* --- 表示スイッチ */
-  if (spr->DispSw == FALSE) return;
-  if (spr->Texture == NULL) return;
-
-  /* --- 回転拡大前処理 */
-  rot = (int)spr->rotation_z;
-  rot %= 360;
-  rot = 359 - rot;
-
-  /* --- 半透明合成値 */
-  blendlevel = ((spr->alpha & 0xff) << 24) | 0xffffff;
-
-  /* --- スプライトを一枚描画する */
-  /* ある程度の大きさを持ったスプライトは短冊状に分割しないと */
-  /* とてつもなく遅くなる */
-  seg = (spr->w / SLICE_SIZE) + 1;
-  vertices = (struct SpriteVertex*)sceGuGetMemory(seg * 4 * sizeof(struct SpriteVertex));
-  pos = 0;
-  w_rest = spr->w;
-  for(i=0; i<seg; i++) {
-    if ((i+1) < seg) {
-      w_size = SLICE_SIZE;
-      w_rest -= SLICE_SIZE;
-    }
-    else {
-      w_size = w_rest;
-    }
-    vertices[i*4].u = spr->tx + pos;
-    vertices[i*4].v = spr->ty;
-    vertices[i*4].color = blendlevel;
-    vertices[i*4].x = spr->x + pos;
-    vertices[i*4].y = spr->y;
-    vertices[i*4].z = 0;
-    vertices[i*4+1].u = spr->tx + pos + w_size;
-    vertices[i*4+1].v = spr->ty;
-    vertices[i*4+1].color = blendlevel;
-    vertices[i*4+1].x = spr->x + pos + w_size;
-    vertices[i*4+1].y = spr->y;
-    vertices[i*4+1].z = 0;
-    vertices[i*4+2].u = spr->tx + pos;
-    vertices[i*4+2].v = spr->ty + spr->h;
-    vertices[i*4+2].color = blendlevel;
-    vertices[i*4+2].x = spr->x + pos;
-    vertices[i*4+2].y = spr->y + spr->h;
-    vertices[i*4+2].z = 0;
-    vertices[i*4+3].u = spr->tx + pos + w_size;
-    vertices[i*4+3].v = spr->ty + spr->h;
-    vertices[i*4+3].color = blendlevel;
-    vertices[i*4+3].x = spr->x + pos + w_size;
-    vertices[i*4+3].y = spr->y + spr->h;
-    vertices[i*4+3].z = 0;
-    pos += SLICE_SIZE;
-    /* --- 回転拡大処理 */
-    center_x = (float)spr->x + ((float)spr->w / 2);
-    center_y = (float)spr->y + ((float)spr->h / 2);
-    for(j=0; j<4; j++) {
-      fx = (float)vertices[i*4+j].x - center_x;
-      fy = (float)vertices[i*4+j].y - center_y;
-      rx = ((fx * sprite_cos[rot]) - (fy * sprite_sin[rot])) * spr->zoomx;
-      ry = ((fx * sprite_sin[rot]) + (fy * sprite_cos[rot])) * spr->zoomy;
-      rx += center_x;
-      ry += center_y;
-      vertices[i*4+j].x = (short)rx;
-      vertices[i*4+j].y = (short)ry;
-    }
-  }
-  /* --- 描画リクエスト */
-  sceGuDrawArray(GU_TRIANGLE_STRIP,
-		 GU_TEXTURE_16BIT|GU_COLOR_8888|GU_VERTEX_16BIT|GU_TRANSFORM_2D,
-		 (seg * 4), 0, vertices);
-
-}
-
-

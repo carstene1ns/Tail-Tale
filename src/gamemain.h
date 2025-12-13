@@ -28,14 +28,6 @@
 /* define                        */
 /*-------------------------------*/
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 /* --- ゲームステップのラベル */
 enum MainStep {
   TitleInit,
@@ -50,7 +42,6 @@ enum MainStep {
   ConfigMain,
   ConfigFree
 };
-
 
 /*-------------------------------*/
 /* struct                        */
@@ -76,9 +67,6 @@ typedef struct {
 
 TGameMain *TGameMain_Create(TGameScreen *mainscreen);
 void TGameMain_Destroy(TGameMain *class);
-
-int TGameMain_Poll(TGameMain *class,
-		   int  counter);
-
+bool TGameMain_Poll(TGameMain *class, int counter);
 
 #endif //GAMEMAIN_H

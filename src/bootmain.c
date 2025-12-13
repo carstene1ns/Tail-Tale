@@ -46,16 +46,13 @@ int  main(int argc, char *argv[])
   FrameSkip = 0;
 
   /* ----- SDL 初期化 */
-  i = SDL_Init(SDL_INIT_VIDEO |
-	       SDL_INIT_AUDIO | 
-	       SDL_INIT_TIMER |
-	       SDL_INIT_JOYSTICK );
+  i = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_JOYSTICK);
   if (i != 0) {
     /* --- SDLが初期化できなかった */
 #ifdef DEBUG
     printf("SDL initialize error.");
 #endif
-    exit(-1);
+    return -1;
   }
 
   /* --- 終了フラグ */
@@ -64,8 +61,7 @@ int  main(int argc, char *argv[])
   /* ----- ハードウェア初期化 */
   InputInit();
   SoundInit();
-  scr = TGameScreen_Create(SCREEN_WIDTH, SCREEN_HEIGHT,
-			   SCREEN_DEPTH);
+  scr = TGameScreen_Create(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_DEPTH);
 
   TGameScreen_SetWMName(scr, WindowName);
   SystemTime = SDL_GetTicks();
@@ -73,7 +69,7 @@ int  main(int argc, char *argv[])
   DispTime = 0;
   FrameCounter = 0;
   srand(time(NULL));
-  InputJoyKeySwap(FALSE);
+  InputJoyKeySwap(false);
 
   /* ----- ゲーム本体初期化 */
   gamemain = TGameMain_Create(scr);
@@ -88,10 +84,10 @@ int  main(int argc, char *argv[])
       InputPoll();
       /* ------------------------------- */
       /* ----- ゲームメインへ */
-      if ((TGameMain_Poll(gamemain, FrameCounter) == FALSE) ||
-	  (InputExit() != 0)) {
-	BeforeTiming = SDL_GetTicks();
-	break;
+      if (!TGameMain_Poll(gamemain, FrameCounter) ||
+        (InputExit() != 0)) {
+        BeforeTiming = SDL_GetTicks();
+        break;
       }
     }
 
@@ -107,7 +103,9 @@ int  main(int argc, char *argv[])
     TGameScreen_RefreshScreen(scr);
     /* --- フレームタイマー */
     DispTime = SDL_GetTicks() - BeforeTiming;
-#ifdef NOTPSP
+#ifdef __PSP__
+    FrameSkip = 0;
+#else
     NowTiming = (1000 / FRAME_RATE) - WorkTime;
     if ((NowTiming > 0) && (NowTiming <= (1000 / FRAME_RATE))) {
       SDL_Delay(NowTiming);
@@ -117,8 +115,6 @@ int  main(int argc, char *argv[])
     if (FrameSkip > FRAME_SKIP_MAX) {
       FrameSkip = FRAME_SKIP_MAX;
     }
-#else
-    FrameSkip = 0;
 #endif
     BeforeTiming = SDL_GetTicks();
 
@@ -141,6 +137,5 @@ int  main(int argc, char *argv[])
   SDL_Quit();
 #endif
 
-  return(0);
+  return 0;
 }
-
