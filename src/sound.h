@@ -42,11 +42,7 @@
 #define SEMAX 16
 
 /* --- VOUME の最大値 */
-#ifdef __GP2X__
-#define VOLUMEDEFAULT 96
-#else
-#define VOLUMEDEFAULT MIX_MAX_VOLUME
-#endif
+#define VOLUMEDEFAULT MIX_MAX_VOLUME/2
 
 /*-------------------------------*/
 /* struct                        */

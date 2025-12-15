@@ -39,26 +39,23 @@
 /* local value                   */
 /*-------------------------------*/
 
-/* ----- イベント */
-SDL_Event event;
-
 /* ----- ユーザーのゲーム操作 */
-SDL_Joystick *JoyPtr[JOY_NUM_MAX];
-unsigned long JoyKey[JOY_NUM_MAX];
-unsigned long JoyStick[JOY_NUM_MAX];
-unsigned long JoyKeyPast[JOY_NUM_MAX];
-unsigned long JoyStickPast[JOY_NUM_MAX];
+static SDL_Joystick *JoyPtr[JOY_NUM_MAX];
+static unsigned long JoyKey[JOY_NUM_MAX];
+static unsigned long JoyStick[JOY_NUM_MAX];
+static unsigned long JoyKeyPast[JOY_NUM_MAX];
+static unsigned long JoyStickPast[JOY_NUM_MAX];
 
 /* ----- ジョイスティックの情報 */
 /*  まあ、一応情報として  */
-int JoyStickAxes[JOY_NUM_MAX];
-int JoyStickButtons[JOY_NUM_MAX];
+static int JoyStickAxes[JOY_NUM_MAX];
+static int JoyStickButtons[JOY_NUM_MAX];
 
 /* ----- 終了キーフラグ */
-int AppExit;
+static int AppExit;
 
 /* ----- GP2X キー設定コンフィギュレーション */
-bool GpKeySwap;
+static bool GpKeySwap;
 
 /* -------------------------------------------------------------- */
 /* --- 入力管理                                                   */
@@ -67,7 +64,7 @@ bool GpKeySwap;
 /* ---------------------------------------- */
 /* --- キーの判別処理                       */
 /* ---------------------------------------- */
-void key_read_down(SDL_KeyboardEvent *key)
+static void key_read_down(SDL_KeyboardEvent *key)
 {
   if (key->keysym.sym == SDLK_UP)
     JoyKey[0] = JoyKey[0] | IN_Up;
@@ -77,17 +74,10 @@ void key_read_down(SDL_KeyboardEvent *key)
     JoyKey[0] = JoyKey[0] | IN_Left;
   if (key->keysym.sym == SDLK_RIGHT)
     JoyKey[0] = JoyKey[0] | IN_Right;
-#ifdef GCW0
-  if (key->keysym.sym == SDLK_LCTRL) //A
-    JoyKey[0] = JoyKey[0] | IN_Button1;
-  if (key->keysym.sym == SDLK_LALT) //B
-    JoyKey[0] = JoyKey[0] | IN_Button2;
-#else
   if (key->keysym.sym == SDLK_z)
     JoyKey[0] = JoyKey[0] | IN_Button1;
   if (key->keysym.sym == SDLK_x)
     JoyKey[0] = JoyKey[0] | IN_Button2;
-#endif
   if (key->keysym.sym == SDLK_c)
     JoyKey[0] = JoyKey[0] | IN_Button3;
   if (key->keysym.sym == SDLK_v)
@@ -105,7 +95,7 @@ void key_read_down(SDL_KeyboardEvent *key)
     AppExit = 1;
 }
 
-void key_read_up(SDL_KeyboardEvent *key)
+static void key_read_up(SDL_KeyboardEvent *key)
 {
   if (key->keysym.sym == SDLK_UP)
     JoyKey[0] = JoyKey[0] & (~(IN_Up));
@@ -115,17 +105,10 @@ void key_read_up(SDL_KeyboardEvent *key)
     JoyKey[0] = JoyKey[0] & (~(IN_Left));
   if (key->keysym.sym == SDLK_RIGHT)
     JoyKey[0] = JoyKey[0] & (~(IN_Right));
-#ifdef GCW0
-  if (key->keysym.sym == SDLK_LCTRL) //A
-    JoyKey[0] = JoyKey[0] & (~(IN_Button1));
-  if (key->keysym.sym == SDLK_LALT) //B
-    JoyKey[0] = JoyKey[0] & (~(IN_Button2));
-#else
   if (key->keysym.sym == SDLK_z)
     JoyKey[0] = JoyKey[0] & (~(IN_Button1));
   if (key->keysym.sym == SDLK_x)
     JoyKey[0] = JoyKey[0] & (~(IN_Button2));
-#endif
   if (key->keysym.sym == SDLK_c)
     JoyKey[0] = JoyKey[0] & (~(IN_Button3));
   if (key->keysym.sym == SDLK_v)
@@ -141,77 +124,111 @@ void key_read_up(SDL_KeyboardEvent *key)
 /* ---------------------------------------- */
 /* --- ジョイスティックの判別処理           */
 /* ---------------------------------------- */
-void joy_read_stick(SDL_JoyAxisEvent *stick)
+static void joy_read_stick(SDL_JoyAxisEvent *stick)
 {
-  if (stick->which < JOY_NUM_MAX) {
-    switch(stick->axis) {
-      /* --- 横方向 */
-    case 0:
-      JoyStick[stick->which] &= (~(IN_Left|IN_Right));
-      if (stick->value < (-JOY_STICK_DITHER)) {
-        JoyStick[stick->which] = JoyStick[stick->which] | IN_Left;
-       }
-      if (stick->value > JOY_STICK_DITHER) {
-        JoyStick[stick->which] = JoyStick[stick->which] | IN_Right;
-      }
-      break;
+  if (stick->which >= JOY_NUM_MAX) return;
 
-      /* --- 縦方向 */
-    case 1:
-      JoyStick[stick->which] &= (~(IN_Up|IN_Down));
-      if (stick->value < (-JOY_STICK_DITHER)) {
-        JoyStick[stick->which] = JoyStick[stick->which] | IN_Up;
-       }
-      if (stick->value > JOY_STICK_DITHER) {
-        JoyStick[stick->which] = JoyStick[stick->which] | IN_Down;
-      }
-      break;
+  switch(stick->axis) {
+    /* --- 横方向 */
+  case 0:
+    JoyStick[stick->which] &= (~(IN_Left|IN_Right));
+    if (stick->value < (-JOY_STICK_DITHER)) {
+      JoyStick[stick->which] = JoyStick[stick->which] | IN_Left;
+     }
+    if (stick->value > JOY_STICK_DITHER) {
+      JoyStick[stick->which] = JoyStick[stick->which] | IN_Right;
     }
+    break;
+
+    /* --- 縦方向 */
+  case 1:
+    JoyStick[stick->which] &= (~(IN_Up|IN_Down));
+    if (stick->value < (-JOY_STICK_DITHER)) {
+      JoyStick[stick->which] = JoyStick[stick->which] | IN_Up;
+     }
+    if (stick->value > JOY_STICK_DITHER) {
+      JoyStick[stick->which] = JoyStick[stick->which] | IN_Down;
+    }
+    break;
   }
 }
 
 
-void joy_read_button_up_pc(SDL_JoyButtonEvent *btn)
+static void joy_read_button_up(SDL_JoyButtonEvent *btn)
 {
-  if (btn->which < JOY_NUM_MAX) {
-    if ((btn->button == 0) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button1));
-    if ((btn->button == 1) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button2));
-    if ((btn->button == 2) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button3));
-    if ((btn->button == 3) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button4));
-    if ((btn->button == 4) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button5));
-    if ((btn->button == 5) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button6));
-    if ((btn->button == 6) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button7));
-    if ((btn->button == 7) && (btn->state == SDL_RELEASED))
-      JoyKey[btn->which] = JoyKey[btn->which] & (~(IN_Button8));
+  if (btn->which >= JOY_NUM_MAX) return;
+
+  switch(btn->button) {
+  case 0:
+    JoyKey[btn->which] &= ~(IN_Button1);
+    break;
+
+  case 1:
+    JoyKey[btn->which] &= ~(IN_Button2);
+    break;
+
+  case 2:
+    JoyKey[btn->which] &= ~(IN_Button3);
+    break;
+
+  case 3:
+    JoyKey[btn->which] &= ~(IN_Button4);
+    break;
+
+  case 4:
+    JoyKey[btn->which] &= ~(IN_Button5);
+    break;
+
+  case 5:
+    JoyKey[btn->which] &= ~(IN_Button6);
+    break;
+
+  case 6:
+    JoyKey[btn->which] &= ~(IN_Button7);
+    break;
+
+  case 7:
+    JoyKey[btn->which] &= ~(IN_Button8);
+    break;
   }
 }
 
-void joy_read_button_down_pc(SDL_JoyButtonEvent *btn)
+static void joy_read_button_down(SDL_JoyButtonEvent *btn)
 {
-  if (btn->which < JOY_NUM_MAX) {
-    if ((btn->button == 0) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button1;
-    if ((btn->button == 1) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button2;
-    if ((btn->button == 2) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button3;
-    if ((btn->button == 3) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button4;
-    if ((btn->button == 4) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button5;
-    if ((btn->button == 5) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button6;
-    if ((btn->button == 6) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button7;
-    if ((btn->button == 7) && (btn->state == SDL_PRESSED))
-      JoyKey[btn->which] = JoyKey[btn->which] | IN_Button8;
+  if (btn->which >= JOY_NUM_MAX) return;
+
+  switch(btn->button) {
+  case 0:
+    JoyKey[btn->which] |= IN_Button1;
+    break;
+
+  case 1:
+    JoyKey[btn->which] |= IN_Button2;
+    break;
+
+  case 2:
+    JoyKey[btn->which] |= IN_Button3;
+    break;
+
+  case 3:
+    JoyKey[btn->which] |= IN_Button4;
+    break;
+
+  case 4:
+    JoyKey[btn->which] |= IN_Button5;
+    break;
+
+  case 5:
+    JoyKey[btn->which] |= IN_Button6;
+    break;
+
+  case 6:
+    JoyKey[btn->which] |= IN_Button7;
+    break;
+
+  case 7:
+    JoyKey[btn->which] |= IN_Button8;
+    break;
   }
 }
 
@@ -265,6 +282,8 @@ void InputFree(void)
 void InputPoll(void)
 {
   AppExit = 0;
+  /* ----- イベント */
+  SDL_Event event;
 
   /* ----- for Triger */
   for(int i=0; i<JOY_NUM_MAX; i++) {
@@ -284,31 +303,11 @@ void InputPoll(void)
       break;
 
     case SDL_JOYBUTTONUP:
-#ifdef __GP2X__
-      if (!GpKeySwap) {
-        joy_read_button_up_gp2x(&event.jbutton);
-      } else {
-        joy_read_button_up_gp2x_rev(&event.jbutton);
-      }
-#elif defined __PSP__
-      joy_read_button_up_psp(&event.jbutton);
-#else
-      joy_read_button_up_pc(&event.jbutton);
-#endif
+      joy_read_button_up(&event.jbutton);
       break;
 
     case SDL_JOYBUTTONDOWN:
-#ifdef __GP2X__
-      if (!GpKeySwap) {
-        joy_read_button_down_gp2x(&event.jbutton);
-      } else {
-        joy_read_button_down_gp2x_rev(&event.jbutton);
-      }
-#elif defined __PSP__
-      joy_read_button_down_psp(&event.jbutton);
-#else
-      joy_read_button_down_pc(&event.jbutton);
-#endif
+      joy_read_button_down(&event.jbutton);
       break;
 
     case SDL_JOYAXISMOTION:
@@ -328,7 +327,7 @@ void InputPoll(void)
 /* ---------------------------------------- */
 int InputExit(void)
 {
-  return(AppExit);  
+  return AppExit;
 }
 
 

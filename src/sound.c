@@ -28,11 +28,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
-
 #include <SDL.h>
-#include <SDL_audio.h>
 #include <SDL_mixer.h>
-
 #include  "sound.h"
 
 /*-------------------------------*/
@@ -46,17 +43,17 @@
 /*-------------------------------*/
 
 /* ----- BGM トラック */
-Mix_Music *SoundTrack;
-char BGMPool[BGMMAX][256];
+static Mix_Music *SoundTrack;
+static char BGMPool[BGMMAX][256];
 
 /* ----- BGM トラック */
-Mix_Chunk *SEPool[SEMAX];
+static Mix_Chunk *SEPool[SEMAX];
 
 /* ----- サウンド有効フラグ */
-bool SoundEnable;
+static bool SoundEnable;
 
 /* ----- サウンドチャンネルのトラック */
-int track;
+static int track;
 
 /* -------------------------------------------------------------- */
 /* --- サウンド                                                   */
@@ -68,10 +65,11 @@ int track;
 void SoundInit(void)
 {
   track = 0;
+  SoundTrack = NULL;
 
   /* ----- SDL_mixer のオープン */
   SoundEnable = true;
-  int ret = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, AUDIO_S16, MIX_DEFAULT_CHANNELS, 1024);
+  int ret = Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, AUDIO_S16SYS, MIX_DEFAULT_CHANNELS, 1024);
   if (ret != 0) {
     SoundEnable = false;
 #ifdef DEBUG
@@ -87,11 +85,11 @@ void SoundInit(void)
 
   /* ----- 配列クリア */
   for(int i=0; i<BGMMAX; i++) {
-    BGMPool[i][0] = 0;
+    BGMPool[i][0] = '\0';
   }
 
   for(int i=0; i<SEMAX; i++) {
-    SEPool[i] = 0;
+    SEPool[i] = NULL;
   }
 
   /* --- BGM list */
@@ -126,15 +124,13 @@ void SoundInit(void)
 /* ---------------------------------------- */
 void SoundFree(void)
 {
-  if (!SoundEnable) {
-    return;
-  }
+  if (!SoundEnable) return;
 
   /* ----- 保持サウンドの解放 */
-  if (SoundTrack != 0) {
+  if (SoundTrack) {
     Mix_HaltMusic();
     Mix_FreeMusic(SoundTrack);
-    SoundTrack = 0;
+    SoundTrack = NULL;
   }
 
   /* ----- SEチャンネルの停止 */
@@ -144,9 +140,9 @@ void SoundFree(void)
 
   /* ----- SE chank の解放 */
   for(int i=0; i<SEMAX; i++) {
-    if (SEPool[i] != 0) {
+    if (SEPool[i]) {
       Mix_FreeChunk(SEPool[i]);
-      SEPool[i] = 0;
+      SEPool[i] = NULL;
     }
   }
 
@@ -154,26 +150,22 @@ void SoundFree(void)
   Mix_CloseAudio();
 }
 
-
 /* ---------------------------------------- */
 /* --- BGM のリクエスト                     */
 /* ---------------------------------------- */
-void SoundMusic(int req)
+static void Music(int req, bool oneShot)
 {
-  if (!SoundEnable) {
-    return;
-  }
+  if (!SoundEnable) return;
 
   /* --- 範囲チェック */
-  if (req < 0) return;
-  if (req >= BGMMAX) return;
-  if (BGMPool[req][0] == 0) return;
+  if (req < 0 || req >= BGMMAX) return;
+  if (BGMPool[req][0] == '\0') return;
 
   /* ----- それまでの演奏停止 */
-  if (SoundTrack != 0) {
+  if (SoundTrack) {
     Mix_HaltMusic();
     Mix_FreeMusic(SoundTrack);
-    SoundTrack = 0;
+    SoundTrack = NULL;
   }
 
   /* ----- BGM 演奏開始 */
@@ -182,10 +174,20 @@ void SoundMusic(int req)
 #ifdef DEBUG
     printf("Could not load %s\n", BGMPool[req]);
 #endif
-    SoundTrack = 0;
+    SoundTrack = NULL;
     return;
   }
-  Mix_PlayMusic(SoundTrack, -1);
+
+  if(oneShot)
+    Mix_PlayMusic(SoundTrack, 1);
+  else
+    Mix_PlayMusic(SoundTrack, -1);
+
+}
+
+void SoundMusic(int req)
+{
+  Music(req, false);
 }
 
 /* ---------------------------------------- */
@@ -193,28 +195,7 @@ void SoundMusic(int req)
 /* ---------------------------------------- */
 void SoundMusicOneshot(int req)
 {
-  if (!SoundEnable) {
-    return;
-  }
-
-  /* --- 範囲チェック */
-  if (req < 0) return;
-  if (req >= BGMMAX) return;
-  if (BGMPool[req][0] == 0) return;
-
-  /* ----- それまでの演奏停止 */
-  if (SoundTrack != 0) {
-    Mix_HaltMusic();
-    Mix_FreeMusic(SoundTrack);
-    SoundTrack = 0;
-  }
-
-  /* ----- BGM 演奏開始 */
-  SoundTrack = Mix_LoadMUS(BGMPool[req]);
-  if (!SoundTrack) {
-    return;
-  }
-  Mix_PlayMusic(SoundTrack, 1);
+  Music(req, true);
 }
 
 
@@ -226,9 +207,8 @@ void SoundSE(int req)
   if (!SoundEnable) return;
 
   /* --- 範囲チェック */
-  if (req < 0) return;
-  if (req >= BGMMAX) return;
-  if (SEPool[req] == 0) return;
+  if (req < 0 || req >= BGMMAX) return;
+  if (!SEPool[req]) return;
 
   /* ----- SE 発呼 */
   Mix_PlayChannel(track, SEPool[req], 0);
@@ -241,9 +221,7 @@ void SoundSE(int req)
 /* ---------------------------------------- */
 void SoundMusicStop(void)
 {
-  if (!SoundEnable) {
-    return;
-  }
+  if (!SoundEnable) return;
 
   /* --- */
   Mix_HaltMusic();
@@ -254,9 +232,7 @@ void SoundMusicStop(void)
 /* ---------------------------------------- */
 void SoundSEStop(void)
 {
-  if (!SoundEnable) {
-    return;
-  }
+  if (!SoundEnable) return;
 
   /* --- */
   /* ----- SEチャンネルの停止 */
@@ -268,10 +244,13 @@ void SoundSEStop(void)
 /* ---------------------------------------- */
 /* --- Volume値の設定                      */
 /* ---------------------------------------- */
-void  SoundVolume(int value)
+void SoundVolume(int value)
 {
   if (value > MIX_MAX_VOLUME) {
     value = MIX_MAX_VOLUME;
+  }
+  if(value < 0) {
+    value = 0;
   }
 
   for(int i=0; i<SECHANMAX; i++) {
@@ -280,4 +259,3 @@ void  SoundVolume(int value)
 
   Mix_VolumeMusic(value);
 }
-

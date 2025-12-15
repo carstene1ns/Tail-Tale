@@ -18,14 +18,8 @@
 /* ------------------------------------------------ */
 
 /* ----- 画面サイズ設定値 */
-
 #define SCREEN_WIDTH  320
 #define SCREEN_HEIGHT 240
-#ifdef __GP2X__
-#define SCREEN_DEPTH  16
-#else
-#define SCREEN_DEPTH  32
-#endif
 
 /* ----- フレームレートの設定 */
 #define FRAME_RATE     60

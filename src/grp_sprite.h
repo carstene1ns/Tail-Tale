@@ -39,7 +39,7 @@ typedef struct {
   int  w, h;
   int  tx, ty;
   unsigned char  alpha;
-  SDL_Surface  *Texture;
+  SDL_Texture  *Texture;
 } TGameSprite, *PTGameSprite;
 
 /* ---------------------------------------------- */
@@ -49,6 +49,6 @@ typedef struct {
 TGameSprite *TGameSprite_Create();
 void TGameSprite_Destroy(TGameSprite *class);
 void TGameSprite_SetTextureDirect(TGameSprite *class, int  texture_id,
-                                  SDL_Surface *bitmap);
+                                  SDL_Texture *texture);
 
 #endif //GRP_SPRITE_H

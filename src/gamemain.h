@@ -49,7 +49,7 @@ enum MainStep {
 
 typedef struct {
   int  titletimer;
-  SDL_Surface  *tex;
+  SDL_Texture  *tex;
   TGameSprite  *bg, *logo, *push, *release, *select_level;
   TGameScreen  *screen;
   int  sound_volume;

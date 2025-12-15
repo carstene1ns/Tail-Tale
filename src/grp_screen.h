@@ -33,48 +33,30 @@
 /*-------------------------------*/
 
 #include <SDL.h>
-
-#include "grp_texture.h"
 #include "grp_sprite.h"
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
 
+/* --- 管理する最大テクスチャー数 */
+#define TEXTUREMAX 16
+
 /* --- 管理する最大スプライト数 */
 #define SPRITEMAX 1024
-
-
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
- #define DRmask 0xff000000
- #define DGmask 0x00ff0000
- #define DBmask 0x0000ff00
- #define DAmask 0x000000ff
-#else
- #define DRmask 0x000000ff
- #define DGmask 0x0000ff00
- #define DBmask 0x00ff0000
- #define DAmask 0xff000000
-#endif
-
 
 /*-------------------------------*/
 /* struct                        */
 /*-------------------------------*/
 
 typedef struct {
-  SDL_Surface *Screen;
-  TGameTexture *Texture;
+  SDL_Window   *Window;
+  SDL_Renderer *Renderer;
+  SDL_Texture  *Textures[TEXTUREMAX];
   TGameSprite  *Sprites[SPRITEMAX];
   int Width;
   int Height;
-  int Depth;
-  /// 現在描画ターゲットになっている GU フレームバッファのポインタ
-  unsigned char *current_buffer_ptr;
-#ifdef __PSP__
-  /// PSPでのGU描画パケットエリア
-  unsigned int  *packet;
-#endif
+  int pixelFormat;
 } TGameScreen, *PTGameScreen;
 
 
@@ -82,14 +64,13 @@ typedef struct {
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
-TGameScreen *TGameScreen_Create(int width, int height, int depth);
+TGameScreen *TGameScreen_Create(int width, int height, const char *title);
 void TGameScreen_Destroy(TGameScreen *class);
 void TGameScreen_SetWMName(TGameScreen *class, char *name);
 void TGameScreen_DispScreen(TGameScreen *class);
 void TGameScreen_RefreshScreen(TGameScreen *class);
 TGameSprite *TGameScreen_GetSprite(TGameScreen *class, int id);
-SDL_Surface *TGameScreen_GetTexture(TGameScreen *class, int id);
+SDL_Texture *TGameScreen_GetTexture(TGameScreen *class, int id);
 void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename);
-void TGameScreen_LoadTexturePure(TGameScreen *class, int num, char *filename);
 
 #endif //GRP_SCREEN_H

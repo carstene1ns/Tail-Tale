@@ -29,7 +29,6 @@
 /*-------------------------------*/
 
 #include <stdlib.h>
-
 #include "debug.h"
 #include "sound.h"
 #include "puz_base.h"
@@ -43,28 +42,28 @@
 /* local function                */
 /*-------------------------------*/
 
-void  DispCursor(TPuzzleDisp *class);
-void  DispBlock(TPuzzleDisp *class);
-void  DispEraseBlock(TPuzzleDisp *class, TGameSprite *obj, Block *bl);
-void  DispBack(TPuzzleDisp *class);
-void  DispChara(TPuzzleDisp *class);
-void  DispNext(TPuzzleDisp *class);
-void  DispScore(TPuzzleDisp *class);
-void  DispNum(TPuzzleDisp *class, int x, int y, int n, int o, int num);
-void  DispKira(TPuzzleDisp *class);
+static void DispCursor(TPuzzleDisp *class);
+static void DispBlock(TPuzzleDisp *class);
+static void DispEraseBlock(TPuzzleDisp *class, TGameSprite *obj, Block *bl);
+static void DispBack(TPuzzleDisp *class);
+static void DispChara(TPuzzleDisp *class);
+static void DispNext(TPuzzleDisp *class);
+static void DispScore(TPuzzleDisp *class);
+static void DispNum(TPuzzleDisp *class, int x, int y, int n, int o, int num);
+static void DispKira(TPuzzleDisp *class);
 
 /*-------------------------------*/
 /* data table                    */
 /*-------------------------------*/
 
-int  animekoma_x[8] = {
+static int  animekoma_x[8] = {
   0, 0, 0, 0, 0, 1, 0, 1
 };
-int  animekoma_y[8] = {
+static int  animekoma_y[8] = {
   0, 0, 0, 0, 0, 0, 256, 0
 };
 
-const int disp_sin[360] = {
+static const int disp_sin[360] = {
   0x8000,0x823b,0x8477,0x86b2,0x88ed,0x8b27,0x8d61,0x8f99,
   0x91d0,0x9406,0x963a,0x986c,0x9a9c,0x9ccb,0x9ef7,0xa120,
   0xa348,0xa56c,0xa78d,0xa9ac,0xabc7,0xaddf,0xaff3,0xb203,
@@ -112,7 +111,7 @@ const int disp_sin[360] = {
   0x6e30,0x7067,0x729f,0x74d9,0x7713,0x794e,0x7b89,0x7dc5,
 };
 
-const int disp_cos[360] = {
+static const int disp_cos[360] = {
   0x0000,0xfffb,0xffec,0xffd3,0xffb0,0xff83,0xff4c,0xff0b,
   0xfec1,0xfe6c,0xfe0e,0xfda5,0xfd33,0xfcb8,0xfc32,0xfba3,
   0xfb0a,0xfa68,0xf9bc,0xf906,0xf847,0xf77f,0xf6ad,0xf5d3,
@@ -177,6 +176,8 @@ TPuzzleDisp *TPuzzleDisp_Create(int  mode, int level, TGameScreen *scr)
   objstep = 0;
   /* --- インスタンスの確保 */
   class = malloc(sizeof(TPuzzleDisp));
+  if(!class) return NULL;
+
   /* ------------------------------------- */
 
   /* ----- 初期化あれこれ */
@@ -232,7 +233,7 @@ TPuzzleDisp *TPuzzleDisp_Create(int  mode, int level, TGameScreen *scr)
   }
 
   /* --- インスタンスを渡して終了 */
-  return(class);
+  return class;
 }
 
 void  TPuzzleDisp_Destroy(TPuzzleDisp *class)
@@ -544,7 +545,7 @@ void TPuzzleDisp_KiraRequest(TPuzzleDisp *class,
 /* ---------------------------------------- */
 /* --- 手のひらカーソルの表示               */
 /* ---------------------------------------- */
-void  DispCursor(TPuzzleDisp *class)
+static void DispCursor(TPuzzleDisp *class)
 {
   /* ----- ハンドカーソル */
   int x = class->fieldpos_x + (class->super->UA.X * BLOCK_WIDTH) + 4;
@@ -591,7 +592,7 @@ void  DispCursor(TPuzzleDisp *class)
 /* ---------------------------------------- */
 /* --- ブロック群の表示                     */
 /* ---------------------------------------- */
-void  DispBlock(TPuzzleDisp *class)
+static void DispBlock(TPuzzleDisp *class)
 {
   int  i;
   int  colx, coly;
@@ -603,18 +604,18 @@ void  DispBlock(TPuzzleDisp *class)
         if (class->super->Field[i]->Color >= 0x10) {
           colx = ((class->super->Field[i]->Color - 0x10) - 1) * BLOCK_WIDTH;
           coly = BLOCK_HEIGHT;
-	}
+        }
         else {
           colx = (class->super->Field[i]->Color - 1) * BLOCK_WIDTH;
           coly = 0;
-	}
+        }
         x = ((i % FIELD_WIDTH) * BLOCK_WIDTH);
         if ((i / FIELD_WIDTH) == 0) {
           y = ((FIELD_HEIGHT - 1) - (i / FIELD_WIDTH)) * BLOCK_HEIGHT + 4 + FIELDTOP;
-	}
+        }
         else {          
           y = ((FIELD_HEIGHT - 1) - (i / FIELD_WIDTH)) * BLOCK_HEIGHT + FIELDTOP;
-	}
+        }
         class->obj[10+i]->DispSw = true;
         class->obj[10+i]->x = x + class->super->Field[i]->SwapOffsetX + class->fieldpos_x;
         class->obj[10+i]->y = y + class->super->Field[i]->SwapOffsetY + class->super->Field[i]->PopupOffset - class->super->Field[i]->DropOffset;
@@ -625,9 +626,9 @@ void  DispBlock(TPuzzleDisp *class)
         class->obj[10+i]->Texture = class->texture[0];
         class->obj[10+i]->alpha = 255;
         /* --- 消えエフェクト中か */
-	if (class->super->Field[i]->LineTimer > 0) {
+        if (class->super->Field[i]->LineTimer > 0) {
           DispEraseBlock(class, class->obj[10+i], class->super->Field[i]);
-	}
+        }
       }
     }
     else {
@@ -640,7 +641,7 @@ void  DispBlock(TPuzzleDisp *class)
 /* ---------------------------------------- */
 /* --- 消えるブロックの表示                 */
 /* ---------------------------------------- */
-void  DispEraseBlock(TPuzzleDisp *class, TGameSprite *obj, Block *bl)
+static void DispEraseBlock(TPuzzleDisp *class, TGameSprite *obj, Block *bl)
 {
   if (bl->LineTimer < 3) {
     obj->tx = 5 * 24;
@@ -654,18 +655,12 @@ void  DispEraseBlock(TPuzzleDisp *class, TGameSprite *obj, Block *bl)
   }
   /* -- きらきらエフェクト */
   if (bl->LineTimer == 3) {
-    TPuzzleDisp_KiraRequest(class, 
-			    obj->x+(BLOCK_WIDTH / 2),
-			    obj->y+(BLOCK_HEIGHT / 2),
-			    60);
-    TPuzzleDisp_KiraRequest(class, 
-			    obj->x+(BLOCK_WIDTH / 2),
-			    obj->y+(BLOCK_HEIGHT / 2),
-			    60);
-    TPuzzleDisp_KiraRequest(class, 
-			    obj->x+(BLOCK_WIDTH / 2),
-			    obj->y+(BLOCK_HEIGHT / 2),
-			    60);
+    TPuzzleDisp_KiraRequest(class,  obj->x+(BLOCK_WIDTH / 2),
+                            obj->y+(BLOCK_HEIGHT / 2), 60);
+    TPuzzleDisp_KiraRequest(class,  obj->x+(BLOCK_WIDTH / 2),
+                            obj->y+(BLOCK_HEIGHT / 2), 60);
+    TPuzzleDisp_KiraRequest(class,  obj->x+(BLOCK_WIDTH / 2),
+                            obj->y+(BLOCK_HEIGHT / 2), 60);
   }
 }
 
@@ -673,44 +668,44 @@ void  DispEraseBlock(TPuzzleDisp *class, TGameSprite *obj, Block *bl)
 /* ---------------------------------------- */
 /* --- 背景の表示                           */
 /* ---------------------------------------- */
-void  DispBack(TPuzzleDisp *class)
+static void DispBack(TPuzzleDisp *class)
 {
-    class->obj[0]->DispSw = true;
-    class->obj[0]->x = 0;
-    class->obj[0]->y = 0;
-    class->obj[0]->w = 480;
-    class->obj[0]->h = 360;
-    class->obj[0]->tx = 0;
-    class->obj[0]->ty = 0;
-    class->obj[0]->Texture = class->texture[0];
-    class->obj[0]->alpha = 255;
-    /* -------------------------------------- */
-    /* --- 隠すべき枠 */
-    class->obj[115]->DispSw = true;
-    class->obj[115]->x = 4;
-    class->obj[115]->y = 220;
-    class->obj[115]->w = 192;
-    class->obj[115]->h = 4;
-    class->obj[115]->tx = 4;
-    class->obj[115]->ty = 220;
-    class->obj[115]->Texture = class->texture[0];
-    class->obj[115]->alpha = 255;
-    class->obj[116]->DispSw = true;
-    class->obj[116]->x = 81;
-    class->obj[116]->y = 0;
-    class->obj[116]->w = 192;
-    class->obj[116]->h = 4;
-    class->obj[116]->tx = 81;
-    class->obj[116]->ty = 0;
-    class->obj[116]->Texture = class->texture[0];
-    class->obj[116]->alpha = 255;
+  class->obj[0]->DispSw = true;
+  class->obj[0]->x = 0;
+  class->obj[0]->y = 0;
+  class->obj[0]->w = 480;
+  class->obj[0]->h = 360;
+  class->obj[0]->tx = 0;
+  class->obj[0]->ty = 0;
+  class->obj[0]->Texture = class->texture[0];
+  class->obj[0]->alpha = 255;
+  /* -------------------------------------- */
+  /* --- 隠すべき枠 */
+  class->obj[115]->DispSw = true;
+  class->obj[115]->x = 4;
+  class->obj[115]->y = 220;
+  class->obj[115]->w = 192;
+  class->obj[115]->h = 4;
+  class->obj[115]->tx = 4;
+  class->obj[115]->ty = 220;
+  class->obj[115]->Texture = class->texture[0];
+  class->obj[115]->alpha = 255;
+  class->obj[116]->DispSw = true;
+  class->obj[116]->x = 81;
+  class->obj[116]->y = 0;
+  class->obj[116]->w = 192;
+  class->obj[116]->h = 4;
+  class->obj[116]->tx = 81;
+  class->obj[116]->ty = 0;
+  class->obj[116]->Texture = class->texture[0];
+  class->obj[116]->alpha = 255;
 }
 
 
 /* ---------------------------------------- */
 /* --- キャラクターの表示                   */
 /* ---------------------------------------- */
-void  DispChara(TPuzzleDisp *class)
+static void DispChara(TPuzzleDisp *class)
 {
   int  i, tanux;
   int  koma;
@@ -750,7 +745,7 @@ void  DispChara(TPuzzleDisp *class)
 /* ---------------------------------------- */
 /* --- ネクストブロックの 'NEXT'            */
 /* ---------------------------------------- */
-void  DispNext(TPuzzleDisp *class)
+static void DispNext(TPuzzleDisp *class)
 {
   int mode = 0;
   if (class->super->NextTimer < 24*2) {
@@ -771,7 +766,7 @@ void  DispNext(TPuzzleDisp *class)
 /* ---------------------------------------- */
 /* --- SCORE等のインフォメーション          */
 /* ---------------------------------------- */
-void  DispScore(TPuzzleDisp *class)
+static void DispScore(TPuzzleDisp *class)
 {
   /* 168 : SCORE */
   /* 169 : BLOCK */
@@ -819,7 +814,7 @@ void  DispScore(TPuzzleDisp *class)
 /* ---------------------------------------- */
 /* --- 数値を表示するサブルーチン           */
 /* ---------------------------------------- */
-void  DispNum(TPuzzleDisp *class, int x, int y, int n, int o, int num)
+static void DispNum(TPuzzleDisp *class, int x, int y, int n, int o, int num)
 {
   int  i, j;
   int  c;
@@ -865,7 +860,7 @@ void  DispNum(TPuzzleDisp *class, int x, int y, int n, int o, int num)
 /* ---------------------------------------- */
 /* --- きらきらエフェクトの表示と移動       */
 /* ---------------------------------------- */
-void  DispKira(TPuzzleDisp *class)
+static void DispKira(TPuzzleDisp *class)
 {
   int  i;
   int  alpha;

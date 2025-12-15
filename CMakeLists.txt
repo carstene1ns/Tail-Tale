@@ -20,9 +20,9 @@ endif()
 set(CMAKE_C_STANDARD 99)
 
 # Get the dependency libraries
-find_package(SDL REQUIRED)
-find_package(SDL_mixer REQUIRED)
-find_package(SDL_image REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 # Define the source files
 add_executable(tailtale WIN32
@@ -31,7 +31,6 @@ add_executable(tailtale WIN32
 	src/gamemain.c src/gamemain.h
 	src/grp_screen.c src/grp_screen.h
 	src/grp_sprite.c src/grp_sprite.h
-	src/grp_texture.c src/grp_texture.h
 	src/input.c src/input.h
 	src/puz_base.c src/puz_base.h
 	src/puz_disp.c src/puz_disp.h
@@ -39,7 +38,13 @@ add_executable(tailtale WIN32
 	src/sound.c src/sound.h)
 
 # Game data
-set(DATA_PREFIX "data/" CACHE PATH "Where game data is located")
+if(UNIX)
+	include(GNUInstallDirs)
+	set(DEFAULT_PREFIX "${CMAKE_INSTALL_DATAROOTDIR}/tailtale")
+else()
+	set(DEFAULT_PREFIX "data")
+endif()
+set(DATA_PREFIX "${DEFAULT_PREFIX}/" CACHE PATH "Where game data is located")
 
 # Define the compilation flags
 target_compile_options(tailtale PRIVATE -Wall)
@@ -50,10 +55,26 @@ if(DEBUG_LOG)
 endif()
 
 # Link the dependencies
-target_include_directories(tailtale PRIVATE
-	${SDL_IMAGE_INCLUDE_DIRS} ${SDL_MIXER_INCLUDE_DIRS} ${SDL_INCLUDE_DIRS})
 target_link_libraries(tailtale PRIVATE
-	${SDL_IMAGE_LIBRARIES} ${SDL_MIXER_LIBRARIES} ${SDL_LIBRARIES})
+	SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2::SDL2)
 if(UNIX)
 	target_link_libraries(tailtale PRIVATE m)
+endif()
+
+# Installation
+if(UNIX)
+	install(TARGETS tailtale
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+	# Desktop entry
+	install(FILES unix/tailtale.desktop
+		DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+	install(FILES unix/tailtale.png
+		DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps)
+	install(FILES unix/tailtale.png
+		DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/32x32/apps)
+
+	# Game data / Themes
+	file(GLOB GAMEDATA LIST_DIRECTORIES false data/*.png data/*.ogg data/*.wav)
+	install(FILES ${GAMEDATA} DESTINATION ${DATA_PREFIX})
 endif()

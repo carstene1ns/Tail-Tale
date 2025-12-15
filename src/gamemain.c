@@ -30,7 +30,6 @@
 
 #include <stdlib.h>
 #include <math.h>
-
 #include "gamemain.h"
 #include "input.h"
 #include "sound.h"
@@ -83,7 +82,6 @@ bool TGameMain_Poll(TGameMain *class, int counter)
 {
   int  i;
   TGameSprite  *sp;
-  SDL_Surface  *texkey;
 
   if (!class) return false;
 
@@ -91,28 +89,7 @@ bool TGameMain_Poll(TGameMain *class, int counter)
 
   /* -------------------------------- */
   /* --- ボリュームコントロール */
-#ifdef __GP2X__
-  i = InputJoyKeyTriger(0);
-  if ((i & IN_GP_VOLUP) != 0) {
-    if (class->sound_volume < 128) {
-      class->sound_volume += 16;
-      if (class->sound_volume > 128) {
-	class->sound_volume = 128;
-      }
-      SoundVolume(class->sound_volume);
-    }
-  }
-  if ((i & IN_GP_VOLDOWN) != 0) {
-    if (class->sound_volume > 0) {
-      class->sound_volume -= 16;
-      if (class->sound_volume < 0) {
-	class->sound_volume = 0;
-      }
-      SoundVolume(class->sound_volume);
-    }
-  }
-  DEBUGPRINT("VOLUME : %d", class->sound_volume);
-#endif
+  // TODO: volume control?
 
   /* -------------------------------- */
   /* --- ゲームメインステップ */
@@ -122,11 +99,6 @@ bool TGameMain_Poll(TGameMain *class, int counter)
     /* -- タイトル初期化 */
   case TitleInit:
     TGameScreen_LoadTexture(class->screen, 0, "title_320.png");
-    texkey = TGameScreen_GetTexture(class->screen, 0);
-    SDL_SetColorKey(texkey,
-		    SDL_SRCCOLORKEY,
-		    SDL_MapRGB(texkey->format,
-			       0x20, 0x40, 0x80));
     class->bg = TGameScreen_GetSprite(class->screen, 0);
     class->logo = TGameScreen_GetSprite(class->screen, 1);
     class->push = TGameScreen_GetSprite(class->screen, 2);
@@ -297,8 +269,8 @@ bool TGameMain_Poll(TGameMain *class, int counter)
     case PuzzleFree:
       TPuzzleTrial_Destroy(class->puzzle);
       for( i=0; i<SPRITEMAX; i++) {
-	sp = TGameScreen_GetSprite(class->screen, i);
-	sp->DispSw = false;
+        sp = TGameScreen_GetSprite(class->screen, i);
+        sp->DispSw = false;
       }
       class->step = TitleInit;
       break;
@@ -306,11 +278,6 @@ bool TGameMain_Poll(TGameMain *class, int counter)
     /* -- GP2X キーコンフィグ */
   case ConfigInit:
     TGameScreen_LoadTexture(class->screen, 0, "control.png");
-    texkey = TGameScreen_GetTexture(class->screen, 0);
-    SDL_SetColorKey(texkey,
-		    SDL_SRCCOLORKEY,
-		    SDL_MapRGB(texkey->format,
-			       0x00, 0x33, 0x33));
     class->bg = TGameScreen_GetSprite(class->screen, 0);
     class->push = TGameScreen_GetSprite(class->screen, 2);
     class->bg->DispSw = true;
@@ -345,25 +312,25 @@ bool TGameMain_Poll(TGameMain *class, int counter)
       class->control_anime_y += class->control_anime;
       class->push->ty = 240 + class->control_anime_y;
       if ((class->control_anime_y <= 0) ||
-	  (class->control_anime_y >= 112)) {
-	class->control_anime = 0;
+        (class->control_anime_y >= 112)) {
+        class->control_anime = 0;
       }
     }
     else {
       i = InputJoyKeyTriger(0);
       if ((i & (IN_Button8)) != 0) {
-	SoundSE(6);
-	class->control_reverse ^= 1;
-	if (class->control_reverse == 0) {
-	  class->control_anime = 8;
-	}
-	else {
-	  class->control_anime = -8;
-	}
+        SoundSE(6);
+        class->control_reverse ^= 1;
+        if (class->control_reverse == 0) {
+          class->control_anime = 8;
+        }
+        else {
+          class->control_anime = -8;
+        }
       }
       if ((i & (IN_Button7)) != 0) {
-	SoundSE(2);
-	class->step = ConfigFree;
+        SoundSE(2);
+        class->step = ConfigFree;
       }
     }
     break;

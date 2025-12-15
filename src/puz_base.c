@@ -42,44 +42,44 @@
 /* local function                */
 /*-------------------------------*/
 
-void SetBlock(TPuzzleBase *class);
-Block *GetBlock(TPuzzleBase *class);
-int  GetBlockColor(TPuzzleBase *class);
-void  PopupNext(TPuzzleBase *class);
-bool PopupWork(TPuzzleBase *class);
-int  FieldHeight(TPuzzleBase *class);
-bool MoveWork(TPuzzleBase *class);
-bool DropRequest(TPuzzleBase *class);
-bool DropWork(TPuzzleBase *class);
-int  LineCheck(TPuzzleBase *class);
-bool LineWork(TPuzzleBase *class);
-int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer);
+static void SetBlock(TPuzzleBase *class);
+static Block *GetBlock(TPuzzleBase *class);
+static int  GetBlockColor(TPuzzleBase *class);
+static void  PopupNext(TPuzzleBase *class);
+static bool PopupWork(TPuzzleBase *class);
+static int  FieldHeight(TPuzzleBase *class);
+static bool MoveWork(TPuzzleBase *class);
+static bool DropRequest(TPuzzleBase *class);
+static bool DropWork(TPuzzleBase *class);
+static int  LineCheck(TPuzzleBase *class);
+static bool LineWork(TPuzzleBase *class);
+static int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer);
 
 /*-------------------------------*/
 /* data table                    */
 /*-------------------------------*/
 
-int  SwapTable[5] = { 0, 6, 4, 0, 0 };
-int  BlockColorSet[7] = { 0, 5, 1, 3, 4, 2, 6 };
+static int  SwapTable[5] = { 0, 6, 4, 0, 0 };
+static int  BlockColorSet[7] = { 0, 5, 1, 3, 4, 2, 6 };
 
 /* --- 難易度設定 */
-int  LevelColor_hard[30] = {
+static int  LevelColor_hard[30] = {
   3, 3, 3, 3, 3, 3, 3, 4, 4, 4,
   4, 4, 4, 4, 4, 4, 4, 4, 5, 5,
   5, 5, 5, 5, 5, 6, 6, 6, 7, 7  };
 
-int  LevelColor_normal[30] = {
+static int  LevelColor_normal[30] = {
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
   4, 5, 5, 5, 5, 5, 5, 5, 6, 6  };
 
-int  LevelColor_easy[30] = {
+static int  LevelColor_easy[30] = {
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   3, 3, 3, 4, 4, 4, 4, 4, 4, 4,
   4, 4, 4, 4, 4, 4, 4, 5, 5, 5  };
 
 
-int  LevelSpeed_easy[30] = {
+static int  LevelSpeed_easy[30] = {
   240, 220, 220, 200, 200,
   200, 200, 240, 220, 220,
   200, 200, 200, 180, 180,
@@ -87,7 +87,7 @@ int  LevelSpeed_easy[30] = {
   180, 160, 160, 140, 180,
   160, 140, 140, 130, 120 };
 
-int  LevelSpeed_normal[30] = {
+static int  LevelSpeed_normal[30] = {
   220, 220, 200, 200, 200,
   180, 180, 220, 220, 200,
   200, 180, 180, 180, 180,
@@ -95,7 +95,7 @@ int  LevelSpeed_normal[30] = {
   180, 160, 140, 120, 180,
   140, 140, 120, 120, 100 };
 
-int  LevelSpeed_hard[30] = {
+static int  LevelSpeed_hard[30] = {
   220, 200, 180, 160, 160,
   140, 140, 200, 200, 180,
   180, 180, 160, 160, 140,
@@ -103,21 +103,22 @@ int  LevelSpeed_hard[30] = {
   140, 120, 120, 100, 140,
   120, 120, 100, 100,  80 };
 
-int  LevelColor_veryhard[30] = {
+/* UNUSED
+static int  LevelColor_veryhard[30] = {
   3, 3, 3, 3, 3, 3, 3, 4, 4, 4,
   4, 4, 4, 4, 4, 4, 4, 4, 5, 5,
   5, 5, 5, 5, 5, 6, 6, 6, 7, 7  };
 
-int  LevelSpeed_veryhard[30] = {
+static int  LevelSpeed_veryhard[30] = {
   220, 180, 180, 160, 160,
   160, 140, 200, 180, 160,
   160, 160, 140, 140, 140,
   120, 100, 160, 140, 120,
   120, 100, 100,  80, 140,
   120, 120, 100, 100,  80 };
+*/
 
-
-int  LevelBlock[30] = {
+static int  LevelBlock[30] = {
   0,  30,  60, 100, 150,
   200, 250, 300, 350, 400,
   500, 550, 600, 650, 700,
@@ -137,11 +138,11 @@ TPuzzleBase *TPuzzleBase_Create(int difficult)
 {
   /* --- インスタンスの確保 */
   TPuzzleBase *class = malloc(sizeof(TPuzzleBase));
+  if (!class) return NULL;
+
   /* --- 確保できたら初期化 */
-  if (class) {
-    for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
-      class->Field[i] = 0;
-    }
+  for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
+    class->Field[i] = 0;
   }
 
   class->Difficult = difficult;
@@ -243,20 +244,20 @@ void TPuzzleBase_GameExec(TPuzzleBase *class)
     PopupWork(class);
     if (!MoveWork(class)) {
       if (DropRequest(class)) {
-	class->GameStep = STEP_DROPWORK;
+        class->GameStep = STEP_DROPWORK;
       }
       else {
-	watch = LineCheck(class);
-	if (watch > 0) {
-	  class->EraseBlock = class->EraseBlock + watch; 
-	  class->EraseScore = ((watch - 3) * 10 * class->Combo) * 4;
-	  class->Score = class->Score + class->EraseScore;
-	  SoundSE(5);
-	  class->GameStep = STEP_LINEFLASH;
-	}
-	else {
-	  class->GameStep = STEP_DROPCHECK;
-	}
+        watch = LineCheck(class);
+        if (watch > 0) {
+          class->EraseBlock = class->EraseBlock + watch; 
+          class->EraseScore = ((watch - 3) * 10 * class->Combo) * 4;
+          class->Score = class->Score + class->EraseScore;
+          SoundSE(5);
+          class->GameStep = STEP_LINEFLASH;
+        }
+        else {
+          class->GameStep = STEP_DROPCHECK;
+        }
       }
     }
     break;
@@ -381,9 +382,7 @@ bool TPuzzleBase_LevelCheck(TPuzzleBase *class)
 /* ---------------------------------------- */
 /* --- ブロックの入れ替えを行う             */
 /* ---------------------------------------- */
-bool  TPuzzleBase_MoveRequest(TPuzzleBase *class,
-			     int posx, int posy,
-			     int dir)
+bool  TPuzzleBase_MoveRequest(TPuzzleBase *class, int posx, int posy, int dir)
 {
   Block  *master, *target;
 
@@ -514,7 +513,7 @@ bool  TPuzzleBase_MoveRequest(TPuzzleBase *class,
 /* ---------------------------------------- */
 /* --- ブロック初期パターン                 */
 /* ---------------------------------------- */
-void SetBlock(TPuzzleBase *class)
+static void SetBlock(TPuzzleBase *class)
 {
   /* --- フィールド配列クリア */
   for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
@@ -535,7 +534,7 @@ void SetBlock(TPuzzleBase *class)
 /* ---------------------------------------- */
 /* --- 空いているブロックを返す             */
 /* ---------------------------------------- */
-Block *GetBlock(TPuzzleBase *class)
+static Block *GetBlock(TPuzzleBase *class)
 {
   Block *b = 0;
   for(int i=0; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
@@ -551,7 +550,7 @@ Block *GetBlock(TPuzzleBase *class)
 /* ---------------------------------------- */
 /* --- 難易度に対し適切なブロックカラーを設定 */
 /* ---------------------------------------- */
-int  GetBlockColor(TPuzzleBase *class)
+static int GetBlockColor(TPuzzleBase *class)
 {
   /* - ブロックカラーはランダム */
   /* === いずれはアイテム混ぜの調整など */
@@ -564,7 +563,7 @@ int  GetBlockColor(TPuzzleBase *class)
 /* ---------------------------------------- */
 /* --- ネクストブロックの迫り上がりと次準備 */
 /* ---------------------------------------- */
-void  PopupNext(TPuzzleBase *class)
+static void PopupNext(TPuzzleBase *class)
 {
   int  i, pos;
 
@@ -598,7 +597,7 @@ void  PopupNext(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- ネクストの迫り上がりカウントとオフセット */
 /* -------------------------------------------- */
-bool PopupWork(TPuzzleBase *class)
+static bool PopupWork(TPuzzleBase *class)
 {
   bool r = false;
   /* --- せり上がりオフセット */
@@ -619,7 +618,7 @@ bool PopupWork(TPuzzleBase *class)
     class->UA.PopupTimer = class->UA.PopupTimer - 1;
     class->UA.PopupOffset = class->UA.PopupOffset - 6;
     if ((class->UA.PopupOffset < 0) ||
-	(class->UA.PopupTimer == 0)) {
+      (class->UA.PopupTimer == 0)) {
       class->UA.PopupOffset = 0;
     }
   }
@@ -651,7 +650,7 @@ bool PopupWork(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- フィールド内の最高位ブロックの位置を返す */
 /* -------------------------------------------- */
-int  FieldHeight(TPuzzleBase *class)
+static int FieldHeight(TPuzzleBase *class)
 {
   int r = 0;
   for(int i=0; i<FIELD_HEIGHT; i++) {
@@ -674,7 +673,7 @@ int  FieldHeight(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- フィールド内の最高位ブロックの位置を返す */
 /* -------------------------------------------- */
-bool MoveWork(TPuzzleBase *class)
+static bool MoveWork(TPuzzleBase *class)
 {
   bool working = false;
   /* --- フィールド内ブロックの移動 */
@@ -718,7 +717,7 @@ bool MoveWork(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- 落下ブロックの判定と落下リクエスト       */
 /* -------------------------------------------- */
-bool DropRequest(TPuzzleBase *class)
+static bool DropRequest(TPuzzleBase *class)
 {
   int position, t;
   Block *b;
@@ -755,7 +754,7 @@ bool DropRequest(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- ブロックの落下                           */
 /* -------------------------------------------- */
-bool DropWork(TPuzzleBase *class)
+static bool DropWork(TPuzzleBase *class)
 {
   bool working = false;
   for(int i=FIELD_WIDTH; i<(FIELD_WIDTH * FIELD_HEIGHT); i++) {
@@ -780,7 +779,7 @@ bool DropWork(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- ブロック揃いのチェック                   */
 /* -------------------------------------------- */
-int  LineCheck(TPuzzleBase *class)
+static int LineCheck(TPuzzleBase *class)
 {
   int working = 0;
   for(int j=1; j<FIELD_HEIGHT; j++) {
@@ -802,7 +801,7 @@ int  LineCheck(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- ブロックが揃って消えるエフェクト         */
 /* -------------------------------------------- */
-bool LineWork(TPuzzleBase *class)
+static bool LineWork(TPuzzleBase *class)
 {
   bool working = false;
   bool sound = false;
@@ -834,7 +833,7 @@ bool LineWork(TPuzzleBase *class)
 /* -------------------------------------------- */
 /* --- ブロック揃いのカウント                   */
 /* -------------------------------------------- */
-int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer)
+static int LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer)
 {
   int  col, nextcol;
   int  score, ready;
@@ -848,16 +847,13 @@ int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer)
   do {
     if (layer == 2) {
       if (class->Field[x + (y * FIELD_WIDTH)] != 0) {
-	class->Field[x + (y * FIELD_WIDTH)]->LineBlock = true;
-	class->Field[x + (y * FIELD_WIDTH)]->LineTimer = 15;
+        class->Field[x + (y * FIELD_WIDTH)]->LineBlock = true;
+        class->Field[x + (y * FIELD_WIDTH)]->LineTimer = 15;
       }
     }
     x = x + dx;
     y = y + dy;
-    if ((x < 0) ||
-	(x >= FIELD_WIDTH) ||
-	(y < 1) ||
-	(y >= FIELD_HEIGHT)) {
+    if ((x < 0) || (x >= FIELD_WIDTH) || (y < 1) || (y >= FIELD_HEIGHT)) {
       nextcol = 0;
     }
     else {
@@ -873,14 +869,11 @@ int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer)
       if (class->Field[x + (y * FIELD_WIDTH)] != 0) {
         if (class->Field[x + (y * FIELD_WIDTH)]->LineBlock) {
           ready = ready + 1;
-	}
+        }
       }
     }
-  } while(!((x < 0) ||
-	  (x >= FIELD_WIDTH) ||
-	  (y < 1) ||
-	  (y >= FIELD_HEIGHT) ||
-	  (col != nextcol)));
+  } while(!((x < 0) || (x >= FIELD_WIDTH) || (y < 1) || (y >= FIELD_HEIGHT) ||
+    (col != nextcol)));
   x = x - dx;
   y = y - dy;
 
@@ -905,5 +898,5 @@ int  LineCount(TPuzzleBase *class, int x, int y, int dx, int dy, int layer)
 
   }
 
-  return(score);
+  return score;
 }

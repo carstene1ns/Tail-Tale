@@ -29,7 +29,6 @@
 /*-------------------------------*/
 
 #include <stdlib.h>
-
 #include "debug.h"
 #include "input.h"
 #include "sound.h"
@@ -43,7 +42,7 @@
 /* local function                */
 /*-------------------------------*/
 
-void ChangeCharacter(TPuzzleTrial *class, int level);
+static void ChangeCharacter(TPuzzleTrial *class, int level);
 
 /*-------------------------------*/
 /* data table                    */
@@ -58,10 +57,10 @@ void ChangeCharacter(TPuzzleTrial *class, int level);
 /* --- コンストラクタ・デストラクタ         */
 TPuzzleTrial *TPuzzleTrial_Create(TGameScreen *scr, int level)
 {
-  TPuzzleTrial *class;
-
   /* --- インスタンスの確保 */
-  class = malloc(sizeof(TPuzzleTrial));
+  TPuzzleTrial *class = malloc(sizeof(TPuzzleTrial));
+  if(!class) return NULL;
+
   /* --- クラスメンバー初期化 */
   class->step = TInit;
   class->status = true;
@@ -77,7 +76,7 @@ TPuzzleTrial *TPuzzleTrial_Create(TGameScreen *scr, int level)
   }
 
   /* --- インスタンスを渡して終了 */
-  return(class);
+  return class;
 }
 
 void TPuzzleTrial_Destroy(TPuzzleTrial *class)
@@ -95,20 +94,8 @@ void TPuzzleTrial_Destroy(TPuzzleTrial *class)
 /* ---------------------------------------- */
 void TPuzzleTrial_LoadTexture(TPuzzleTrial *class)
 {
-  SDL_Surface  *texkey;
-
   TGameScreen_LoadTexture(class->screen, 2, "trial_parts_320.png");
-  texkey = TGameScreen_GetTexture(class->screen, 2);
-  SDL_SetColorKey(texkey,
-		  SDL_SRCCOLORKEY,
-		  SDL_MapRGB(texkey->format,
-			     0x00, 0x00, 0x00));
   TGameScreen_LoadTexture(class->screen, 8, "chara01_1.png");
-  texkey = TGameScreen_GetTexture(class->screen, 8);
-  SDL_SetColorKey(texkey,
-		  SDL_SRCCOLORKEY,
-		  SDL_MapRGB(texkey->format,
-			     0x66, 0x66, 0x66));
 }
 
 
@@ -117,9 +104,7 @@ void TPuzzleTrial_LoadTexture(TPuzzleTrial *class)
 /* ---------------------------------------- */
 bool TPuzzleTrial_GameStat(TPuzzleTrial *class)
 {
-  if (class->step == TEnd) {
-    return false;
-  }
+  if (class->step == TEnd) return false;
 
   return true;
 }
@@ -166,12 +151,11 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     TPuzzleBase_GameExec(class->super->super);
     if (TPuzzleBase_LevelCheck(class->super->super)) {
       /* --- レベルアップ時アトラクト */
-      TPuzzleBase_GameLevel(class->super->super,
-			    class->super->super->Level);
+      TPuzzleBase_GameLevel(class->super->super, class->super->super->Level);
       ChangeCharacter(class, class->super->super->Level);
       SoundSE(2);
       for(i=0; i<16; i++) {
-	TPuzzleDisp_KiraRequest(class->super, 444-152, 152, 80);
+        TPuzzleDisp_KiraRequest(class->super, 444-152, 152, 80);
       }
     }
     TPuzzleDisp_DispField(class->super);
@@ -190,10 +174,10 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     j = (class->readytimer / 2) + 1;
     for(i=0; i<FIELD_WIDTH; i++) {
       if (class->super->super->Field[j*FIELD_WIDTH + i] != 0) {
-	if (class->super->super->Field[j*FIELD_WIDTH + i]->Color < 0x10) {
-              class->super->super->Field[j*FIELD_WIDTH + i]->Color =
-		class->super->super->Field[j*FIELD_WIDTH + i]->Color + 0x10;
-	}
+        if (class->super->super->Field[j*FIELD_WIDTH + i]->Color < 0x10) {
+          class->super->super->Field[j*FIELD_WIDTH + i]->Color =
+            class->super->super->Field[j*FIELD_WIDTH + i]->Color + 0x10;
+        }
       }
     }
     TPuzzleDisp_DispField(class->super);
@@ -213,11 +197,11 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
     class->readytimer = class->readytimer + 1;
     if (class->readytimer > 160) {
       if ((i & (IN_Button1|IN_Button2|IN_Button3|IN_Button4|IN_Button7)) != 0) {
-	class->step = TEnd;
+        class->step = TEnd;
         if (class->readytimer > 320) {
           SoundMusicStop();
           class->step = TEnd;
-	}
+        }
       }
     }
     break;
@@ -255,37 +239,29 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
   inp = InputJoyKeyTriger(0);
   if (((inp & IN_Up) != 0) && (class->super->super->UA.Y < (FIELD_HEIGHT -1))) {
     if (class->super->super->UA.HaveBlock) {
-      TPuzzleBase_MoveRequest(class->super->super,
-			      class->super->super->UA.X,
-			      class->super->super->UA.Y,
-			      MOVE_UP);
+      TPuzzleBase_MoveRequest(class->super->super, class->super->super->UA.X,
+                              class->super->super->UA.Y, MOVE_UP);
     }
     class->super->super->UA.Y = class->super->super->UA.Y + 1;
   }
   if (((inp & IN_Down) != 0) && (class->super->super->UA.Y > 1)) {
     if (class->super->super->UA.HaveBlock) {
-      TPuzzleBase_MoveRequest(class->super->super,
-			      class->super->super->UA.X,
-			      class->super->super->UA.Y,
-			      MOVE_DOWN);
+      TPuzzleBase_MoveRequest(class->super->super, class->super->super->UA.X,
+                              class->super->super->UA.Y, MOVE_DOWN);
     }
     class->super->super->UA.Y = class->super->super->UA.Y - 1;
   }
   if (((inp & IN_Left) != 0) && (class->super->super->UA.X > 0)) {
     if (class->super->super->UA.HaveBlock) {
-      TPuzzleBase_MoveRequest(class->super->super,
-			      class->super->super->UA.X,
-			      class->super->super->UA.Y,
-			      MOVE_LEFT);
+      TPuzzleBase_MoveRequest(class->super->super, class->super->super->UA.X,
+                              class->super->super->UA.Y, MOVE_LEFT);
     }
     class->super->super->UA.X = class->super->super->UA.X - 1;
   }
   if (((inp & IN_Right) != 0) && (class->super->super->UA.X < (FIELD_WIDTH -1))) {
     if (class->super->super->UA.HaveBlock) {
-      TPuzzleBase_MoveRequest(class->super->super,
-			      class->super->super->UA.X,
-			      class->super->super->UA.Y,
-			      MOVE_RIGHT);
+      TPuzzleBase_MoveRequest(class->super->super, class->super->super->UA.X,
+                              class->super->super->UA.Y, MOVE_RIGHT);
     }
     class->super->super->UA.X = class->super->super->UA.X + 1;
   }
@@ -301,10 +277,8 @@ void TPuzzleTrial_UserControl(TPuzzleTrial *class)
 /* ---------------------------------------- */
 /* --- キャラクター変更                     */
 /* ---------------------------------------- */
-void ChangeCharacter(TPuzzleTrial *class, int level)
+static void ChangeCharacter(TPuzzleTrial *class, int level)
 {
-  SDL_Surface  *texkey;
-
   switch(level) {
   case 6:
     TGameScreen_LoadTexture(class->screen, 8, "chara01_2.png");
@@ -325,12 +299,5 @@ void ChangeCharacter(TPuzzleTrial *class, int level)
   case 26:
     TGameScreen_LoadTexture(class->screen, 8, "chara01_6.png");
     break;
-    
   }
-
-  texkey = TGameScreen_GetTexture(class->screen, 8);
-  SDL_SetColorKey(texkey,
-		  SDL_SRCCOLORKEY,
-		  SDL_MapRGB(texkey->format,
-			     0x66, 0x66, 0x66));
 }

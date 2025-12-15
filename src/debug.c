@@ -30,7 +30,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <SDL.h>
+#include <SDL_image.h>
 #include "debug.h"
 #include "grp_screen.h"
 
@@ -39,23 +40,24 @@
 /*-------------------------------*/
 
 /* ----- デバッグルーチンが有効か否か(ASCIIが準備出来てるか) */
-int UseDebug;
+static bool UseDebug;
 
 /* ----- アスキーフォントテクスチャー */
-SDL_Surface *AsciiFont;
+static SDL_Surface *AsciiFont;
 
 /* ----- アスキープレーン */
-SDL_Surface *AsciiPlane;
+static SDL_Surface *AsciiPlane;
+static SDL_Texture *AsciiTex;
 
 /* ----- 表示文字列 */
-char StockString[MessageMax][128];
-int StockNum;
+static char StockString[MessageMax][128];
+static int StockNum;
 
 /* ----- アスキーテクスチャー名 */
 #ifdef DATA_PREFIX
-char *TextureName = DATA_PREFIX "/ascii.bmp";
+static char *TextureName = DATA_PREFIX "/ascii.png";
 #else
-char *TextureName = "./data/ascii.bmp";
+static char *TextureName = "./data/ascii.png";
 #endif
 
 /* --- デバッグフォント文字列 */
@@ -68,7 +70,7 @@ char debug_line[128];
 
 /* ---------------------------------------- */
 /* --- メッセージのライン表示    */
-void print_msg(char *mes, int disp_x, int disp_y)
+static void print_msg(char *mes, int disp_x, int disp_y)
 {
   int  i, l;
   int  c;
@@ -91,46 +93,29 @@ void print_msg(char *mes, int disp_x, int disp_y)
 }
 
 
-
 /* ---------------------------------------- */
 /* --- デバッグフェイス初期化               */
 /* ---------------------------------------- */
-void TDebugInit(TGameScreen *screen, int Width, int Height, int Depth)
+void TDebugInit(TGameScreen *screen, int Width, int Height)
 {
-  SDL_Surface *plane;
-
   StockNum = 0;
-  UseDebug = 1;
-  plane = SDL_LoadBMP(TextureName);
-  if (plane == NULL) {
-    UseDebug = 0;
+  UseDebug = true;
+  AsciiFont = IMG_Load(TextureName);
+  if (!AsciiFont) {
+    UseDebug = false;
     return;
   }
-  AsciiFont = SDL_ConvertSurface(plane, screen->Screen->format, SDL_SWSURFACE);
-  if (AsciiFont == NULL) {
-    UseDebug = 0;
+
+  AsciiPlane = SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 0,
+                                              screen->pixelFormat);
+
+  AsciiTex = SDL_CreateTexture(screen->Renderer, screen->pixelFormat,
+                               SDL_TEXTUREACCESS_STREAMING, Width, Height);
+  SDL_SetTextureBlendMode(AsciiTex, SDL_BLENDMODE_BLEND);
+
+  if (!AsciiPlane || !AsciiTex) {
+    UseDebug = false;
   }
-  SDL_SetColorKey(AsciiFont, SDL_SRCCOLORKEY, 0x000000);
-#ifdef __GP2X__
-  AsciiPlane = SDL_CreateRGBSurface(SDL_SWSURFACE,
-				    Width, Height, Depth,
-				    screen->Screen->format->Rmask,
-				    screen->Screen->format->Gmask,
-				    screen->Screen->format->Bmask,
-				    screen->Screen->format->Amask);
-  SDL_SetColorKey(AsciiPlane, SDL_SRCCOLORKEY, 0);
-#else
-  AsciiPlane = SDL_CreateRGBSurface(SDL_SWSURFACE,
-				    Width, Height, Depth,
-				    DRmask,
-				    DGmask,
-				    DBmask,
-				    DAmask);
-#endif
-  if (AsciiPlane == NULL) {
-    UseDebug = 0;
-  }
-  SDL_FreeSurface(plane);
 }
 
 
@@ -141,7 +126,8 @@ void TDebugFree()
 {
   SDL_FreeSurface(AsciiPlane);
   SDL_FreeSurface(AsciiFont);
-  UseDebug = 0;
+  SDL_DestroyTexture(AsciiTex);
+  UseDebug = false;
 }
 
 
@@ -156,7 +142,7 @@ void TDebugDisp(TGameScreen *screen)
   int  i;
 
   /* --- 準備が出来ていなかったら回避 */
-  if (UseDebug == 0) {
+  if (!UseDebug) {
     return;
   }
 
@@ -174,7 +160,6 @@ void TDebugDisp(TGameScreen *screen)
 
   /* --- アスキープレーンをスクリーンに */
   if (disp_edge > 0) {
-//    SDL_UpdateRect(AsciiPlane, 0, 0, disp_edge, disp_y);
     rect1.x = 0;
     rect1.y = 0;
     rect1.w = disp_edge;
@@ -183,8 +168,9 @@ void TDebugDisp(TGameScreen *screen)
     rect2.y = 0;
     rect2.w = disp_edge;
     rect2.h = disp_y;
-    SDL_BlitSurface(AsciiPlane, &rect1, screen->Screen, &rect2);
-    SDL_FillRect(AsciiPlane, 0, 0x00000000);
+    SDL_UpdateTexture(AsciiTex, NULL, AsciiPlane->pixels, AsciiPlane->pitch);
+    SDL_RenderCopy(screen->Renderer, AsciiTex, &rect1, &rect2);
+    SDL_FillRect(AsciiPlane, NULL, SDL_MapRGBA(AsciiPlane->format,0xff,0xff,0xff,0x00));
   }
   StockNum = 0;  
 }

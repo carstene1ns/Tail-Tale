@@ -4,15 +4,8 @@
  */
 
 #include <stdlib.h>
-#ifdef __GP2X__
-#include <unistd.h>
-#endif
 #include <time.h>
-
 #include <SDL.h>
-#include <SDL_main.h>
-#include <SDL_audio.h>
-#include <SDL_mixer.h>
 
 #include "bootmain.h"
 #include "debug.h"
@@ -61,9 +54,8 @@ int  main(int argc, char *argv[])
   /* ----- ハードウェア初期化 */
   InputInit();
   SoundInit();
-  scr = TGameScreen_Create(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_DEPTH);
+  scr = TGameScreen_Create(SCREEN_WIDTH, SCREEN_HEIGHT, WindowName);
 
-  TGameScreen_SetWMName(scr, WindowName);
   SystemTime = SDL_GetTicks();
   BeforeTiming = SystemTime;
   DispTime = 0;
@@ -103,9 +95,7 @@ int  main(int argc, char *argv[])
     TGameScreen_RefreshScreen(scr);
     /* --- フレームタイマー */
     DispTime = SDL_GetTicks() - BeforeTiming;
-#ifdef __PSP__
-    FrameSkip = 0;
-#else
+
     NowTiming = (1000 / FRAME_RATE) - WorkTime;
     if ((NowTiming > 0) && (NowTiming <= (1000 / FRAME_RATE))) {
       SDL_Delay(NowTiming);
@@ -115,9 +105,8 @@ int  main(int argc, char *argv[])
     if (FrameSkip > FRAME_SKIP_MAX) {
       FrameSkip = FRAME_SKIP_MAX;
     }
-#endif
-    BeforeTiming = SDL_GetTicks();
 
+    BeforeTiming = SDL_GetTicks();
 
     /* ---------------------------------------- */
     /* ----- メインループココまで               */
@@ -130,12 +119,7 @@ int  main(int argc, char *argv[])
   /* --- 終了、SDL 後処理 */
   SoundFree();
   InputFree();
-#ifdef __GP2X__
-  chdir("/usr/gp2x");
-  execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
-#else
   SDL_Quit();
-#endif
 
   return 0;
 }

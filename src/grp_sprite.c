@@ -51,9 +51,8 @@ TGameSprite *TGameSprite_Create(void)
   TGameSprite *class;
 
   class = malloc(sizeof(TGameSprite));
-  if (!class) {
-    return NULL;
-  }
+  if (!class) return NULL;
+
   class->Texture = NULL;
   class->TextureId = -1;
   class->DispSw = false;
@@ -63,18 +62,19 @@ TGameSprite *TGameSprite_Create(void)
 
 void TGameSprite_Destroy(TGameSprite *class)
 {
-  if (class) {
-    free(class);
-  }
+  if (!class) return;
+
+  free(class);
 }
 
 /* ---------------------------------------- */
 /* --- テクスチャーの登録                   */
 /* ---------------------------------------- */
 void TGameSprite_SetTextureDirect(TGameSprite *class, int  texture_id,
-                                  SDL_Surface *bitmap)
+                                  SDL_Texture *texture)
 {
   if (!class) return;
+
   class->TextureId = texture_id;
-  class->Texture = bitmap;
+  class->Texture = texture;
 }

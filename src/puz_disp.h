@@ -80,7 +80,7 @@ typedef struct {
   /* - 表示用オブジェクトポインター */
   TGameSprite  *obj[OBJMAX];
   /* - テクスチャーポインター */
-  SDL_Surface  *texture[TEXMAX];
+  SDL_Texture  *texture[TEXMAX];
   /* --- private */
   /* - きらきらエフェクト */
   Kira  kirakira[KIRAMAX];
