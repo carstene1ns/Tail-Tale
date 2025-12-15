@@ -169,10 +169,20 @@ void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename)
 
   /* ----- テクスチャーの読み込み */
   char name[256];
-#ifdef DATA_PREFIX
-  snprintf(name, sizeof(name), "%s/%s", DATA_PREFIX, filename);
+#ifdef HIGH_QUALITY
+  #define RES_PREFIX "480"
 #else
-  snprintf(name, sizeof(name), "./data/%s", filename);
+  #define RES_PREFIX "320"
+#endif
+
+#ifdef DATA_PREFIX
+  snprintf(name, sizeof(name), "%s/gfx/%s/%s", DATA_PREFIX, RES_PREFIX, filename);
+#else
+  snprintf(name, sizeof(name), "./data/gfx/%s/%s", RES_PREFIX, filename);
+#endif
+
+#ifdef DEBUG
+  printf("Loading %s\n", name);
 #endif
 
   SDL_Texture *plane = IMG_LoadTexture(class->Renderer, name);

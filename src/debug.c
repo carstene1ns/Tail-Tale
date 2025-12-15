@@ -55,9 +55,9 @@ static int StockNum;
 
 /* ----- アスキーテクスチャー名 */
 #ifdef DATA_PREFIX
-static char *TextureName = DATA_PREFIX "/ascii.png";
+static char *TextureName = DATA_PREFIX "/gfx/ascii.png";
 #else
-static char *TextureName = "./data/ascii.png";
+static char *TextureName = "./gfx/data/ascii.png";
 #endif
 
 /* --- デバッグフォント文字列 */

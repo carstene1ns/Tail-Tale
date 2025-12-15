@@ -21,6 +21,7 @@
 /*-------------------------------*/
 
 #include <stdbool.h>
+#include "puz_res.h"
 
 /*-------------------------------*/
 /* define                        */
@@ -33,7 +34,7 @@
 /* --- フィールドサイズ */
 #define FIELD_WIDTH  8
 /* Next 込み */
-#define FIELD_HEIGHT 10
+// FIELD_HEIGHT in puz_res.h
 #define ALL_BLOCK (FIELD_WIDTH * FIELD_HEIGHT)
 
 /* --- 何個で消えるか */

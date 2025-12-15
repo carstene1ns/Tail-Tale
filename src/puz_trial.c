@@ -94,7 +94,7 @@ void TPuzzleTrial_Destroy(TPuzzleTrial *class)
 /* ---------------------------------------- */
 void TPuzzleTrial_LoadTexture(TPuzzleTrial *class)
 {
-  TGameScreen_LoadTexture(class->screen, 2, "trial_parts_320.png");
+  TGameScreen_LoadTexture(class->screen, 2, "trial_parts.png");
   TGameScreen_LoadTexture(class->screen, 8, "chara01_1.png");
 }
 
@@ -155,7 +155,7 @@ void TPuzzleTrial_GameMain(TPuzzleTrial *class)
       ChangeCharacter(class, class->super->super->Level);
       SoundSE(2);
       for(i=0; i<16; i++) {
-        TPuzzleDisp_KiraRequest(class->super, 444-152, 152, 80);
+        TPuzzleDisp_KiraRequest(class->super, KIRA_REQUEST_X, 152, 80);
       }
     }
     TPuzzleDisp_DispField(class->super);

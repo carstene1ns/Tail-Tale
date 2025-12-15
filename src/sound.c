@@ -95,9 +95,9 @@ void SoundInit(void)
   /* --- BGM list */
   for(int i=0; i<BGMMAX; i++) {
 #ifdef DATA_PREFIX
-    snprintf(BGMPool[i], sizeof(BGMPool[i]), "%s/bgm%02d.ogg", DATA_PREFIX, i);
+    snprintf(BGMPool[i], sizeof(BGMPool[i]), "%s/snd/bgm%02d.ogg", DATA_PREFIX, i);
 #else
-    snprintf(BGMPool[i], sizeof(BGMPool[i]), "./data/bgm%02d.ogg", i);
+    snprintf(BGMPool[i], sizeof(BGMPool[i]), "./data/snd/bgm%02d.ogg", i);
 #endif
   }
 
@@ -105,9 +105,9 @@ void SoundInit(void)
   char name[256];
   for(int i=0; i<SEMAX; i++)  {
 #ifdef DATA_PREFIX
-    snprintf(name, sizeof(name), "%s/se%02d.wav", DATA_PREFIX, i);
+    snprintf(name, sizeof(name), "%s/snd/se%02d.wav", DATA_PREFIX, i);
 #else	
-    snprintf(name, sizeof(name), "./data/se%02d.wav", i);
+    snprintf(name, sizeof(name), "./data/snd/se%02d.wav", i);
 #endif	
     SEPool[i] = Mix_LoadWAV(name);
 #ifdef DEBUG

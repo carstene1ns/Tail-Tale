@@ -13,13 +13,11 @@
 #ifndef BOOTMAIN_H
 #define BOOTMAIN_H
 
+#include "puz_res.h"
+
 /* ------------------------------------------------ */
 /* --- define                                       */
 /* ------------------------------------------------ */
-
-/* ----- 画面サイズ設定値 */
-#define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 240
 
 /* ----- フレームレートの設定 */
 #define FRAME_RATE     60

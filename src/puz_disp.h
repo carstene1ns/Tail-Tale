@@ -21,6 +21,7 @@
 /*-------------------------------*/
 
 #include "grp_screen.h"
+#include "puz_res.h"
 
 /*-------------------------------*/
 /* define                        */
@@ -29,7 +30,6 @@
 /* --- 表示関係の定数 */
 #define OBJMAX   186
 #define TEXMAX   5
-#define FIELDTOP 4
 #define KIRAMAX  36
 
 enum GameMode {

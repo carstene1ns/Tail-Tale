@@ -32,6 +32,7 @@ add_executable(tailtale WIN32
 	src/grp_screen.c src/grp_screen.h
 	src/grp_sprite.c src/grp_sprite.h
 	src/input.c src/input.h
+	src/puz_res.h
 	src/puz_base.c src/puz_base.h
 	src/puz_disp.c src/puz_disp.h
 	src/puz_trial.c src/puz_trial.h
@@ -49,6 +50,10 @@ set(DATA_PREFIX "${DEFAULT_PREFIX}/" CACHE PATH "Where game data is located")
 # Define the compilation flags
 target_compile_options(tailtale PRIVATE -Wall)
 target_compile_definitions(tailtale PRIVATE DATA_PREFIX="${DATA_PREFIX}")
+option(HIGH_QUALITY "Render in 480x360 instead of 320x240" ON)
+if(HIGH_QUALITY)
+	target_compile_definitions(tailtale PRIVATE HIGH_QUALITY)
+endif()
 option(DEBUG_LOG "Print debug message" OFF)
 if(DEBUG_LOG)
 	target_compile_definitions(tailtale PRIVATE DEBUG)

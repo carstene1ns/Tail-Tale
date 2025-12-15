@@ -98,57 +98,62 @@ bool TGameMain_Poll(TGameMain *class, int counter)
 
     /* -- タイトル初期化 */
   case TitleInit:
-    TGameScreen_LoadTexture(class->screen, 0, "title_320.png");
+    TGameScreen_LoadTexture(class->screen, 0, "title.png");
     class->bg = TGameScreen_GetSprite(class->screen, 0);
-    class->logo = TGameScreen_GetSprite(class->screen, 1);
-    class->push = TGameScreen_GetSprite(class->screen, 2);
-    class->release = TGameScreen_GetSprite(class->screen, 3);
-    class->select_level = TGameScreen_GetSprite(class->screen, 4);
     class->bg->DispSw = true;
     class->bg->x = 0;
     class->bg->y = 0;
-    class->bg->w = 320;
-    class->bg->h = 240;
+    class->bg->w = SCREEN_WIDTH;
+    class->bg->h = SCREEN_HEIGHT;
     class->bg->tx = 0;
     class->bg->ty = 0;
     class->bg->Texture = TGameScreen_GetTexture(class->screen, 0);
     class->bg->alpha = 255;
+
+    class->logo = TGameScreen_GetSprite(class->screen, 1);
     class->logo->DispSw = false;
     class->logo->x = 0;
     class->logo->y = 0;
-    class->logo->w = 300;
-    class->logo->h = 84;
+    class->logo->w = LOGO_RECT_W;
+    class->logo->h = LOGO_RECT_H;
     class->logo->tx = 0;
-    class->logo->ty = 240;
+    class->logo->ty = SCREEN_HEIGHT;
     class->logo->Texture = TGameScreen_GetTexture(class->screen, 0);
     class->logo->alpha = 255;
+
+    class->push = TGameScreen_GetSprite(class->screen, 2);
     class->push->DispSw = false;
-    class->push->x = 40;
-    class->push->y = 180;
-    class->push->w = 240;
-    class->push->h = 23;
+    class->push->x = PUSH_RECT_X;
+    class->push->y = PUSH_RECT_Y;
+    class->push->w = PUSH_RECT_W;
+    class->push->h = PUSH_RECT_H;
     class->push->tx = 0;
-    class->push->ty = 325;
+    class->push->ty = SCREEN_HEIGHT+LOGO_RECT_H;
     class->push->Texture = TGameScreen_GetTexture(class->screen, 0);
     class->push->alpha = 255;
+
+    class->release = TGameScreen_GetSprite(class->screen, 3);
     class->release->DispSw = false;
-    class->release->x = 40;
-    class->release->y = 210;
-    class->release->w = 240;
-    class->release->h = 10;
+    class->release->x = RELEASE_RECT_X;
+    class->release->y = RELEASE_RECT_Y;
+    class->release->w = RELEASE_RECT_W;
+    class->release->h = RELEASE_RECT_H;
     class->release->tx = 0;
-    class->release->ty = 349;
+    class->release->ty = SCREEN_HEIGHT+LOGO_RECT_H+PUSH_RECT_H + 2;
     class->release->Texture = TGameScreen_GetTexture(class->screen, 0);
     class->release->alpha = 255;
+
+    class->select_level = TGameScreen_GetSprite(class->screen, 4);
     class->select_level->DispSw = false;
-    class->select_level->x = 160-40;
-    class->select_level->y = 160;
-    class->select_level->w = 80;
-    class->select_level->h = 18;
-    class->select_level->tx = 300;
-    class->select_level->ty = 240 + (24 * class->level);
+    class->select_level->x = SELECT_RECT_X;
+    class->select_level->y = SELECT_RECT_Y;
+    class->select_level->w = SELECT_RECT_W;
+    class->select_level->h = SELECT_RECT_H;
+    class->select_level->tx = LOGO_RECT_W + 1;
+    class->select_level->ty = SCREEN_HEIGHT + (((4/3.f)*SELECT_RECT_H) * class->level);
     class->select_level->Texture = TGameScreen_GetTexture(class->screen, 0);
     class->select_level->alpha = 255;
+
     class->titletimer = 0;
     class->step = TitleIn;
     skip = false;
@@ -160,13 +165,13 @@ bool TGameMain_Poll(TGameMain *class, int counter)
     if (class->titletimer == 15*2) SoundSE(1);
     if (class->titletimer > 20*2) {
       /* はずむ */
-      class->logo->x = 10;
+      class->logo->x = LOGO_RECT_X;
       class->logo->y = 120 - (int)(sin(3.1415926 * 2.0 * (((float)class->titletimer - 40.0) / 120.0)) * 120.0);
       class->logo->DispSw = true;
     }
     else {
       /* 上から降ってくる */
-      class->logo->x = 10;
+      class->logo->x = LOGO_RECT_X;
       class->logo->y = 120 - ((40 - class->titletimer) * 10);
       class->logo->DispSw = true;
     }
@@ -189,7 +194,7 @@ bool TGameMain_Poll(TGameMain *class, int counter)
     /* -- スタートボタン待ち */
   case TitleMain:
     class->logo->DispSw = true;
-    class->logo->x = 10;
+    class->logo->x = LOGO_RECT_X;
     class->logo->y = 60;
     class->release->DispSw = true;
     class->select_level->DispSw = true;
@@ -216,13 +221,13 @@ bool TGameMain_Poll(TGameMain *class, int counter)
     if ((i & IN_Right) != 0) {
       class->level ^= LevelHard;
     }
-    class->select_level->ty = 240 + (24 * class->level);
+    class->select_level->ty = SCREEN_HEIGHT + (((4/3.f)*SELECT_RECT_H) * class->level);
     break;
 
     /* -- スタート時アトラクト */
   case TitleStart:
     class->logo->DispSw = true;
-    class->logo->x = 10;
+    class->logo->x = LOGO_RECT_X;
     class->logo->y = 60;
     class->release->DispSw = true;
     if ((class->titletimer % 2) == 1) {

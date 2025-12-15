@@ -60,7 +60,7 @@ static int  animekoma_x[8] = {
   0, 0, 0, 0, 0, 1, 0, 1
 };
 static int  animekoma_y[8] = {
-  0, 0, 0, 0, 0, 0, 256, 0
+  0, 0, 0, 0, 0, 0, CHARA_SIZE, 0
 };
 
 static const int disp_sin[360] = {
@@ -188,7 +188,7 @@ TPuzzleDisp *TPuzzleDisp_Create(int  mode, int level, TGameScreen *scr)
   switch(mode) {
 
   case MODE_CHALLENGE:
-    class->fieldpos_x = 4;
+    class->fieldpos_x = FIELD_POS_X;
     objstep = 0;
     j = 0;
     break;
@@ -293,8 +293,8 @@ void TPuzzleDisp_DispReady(TPuzzleDisp *class, int time)
     class->obj[160]->y = 160 + (15 - (time/2)) * 20;
     class->obj[160]->w = 170;
     class->obj[160]->h = 44;
-    class->obj[160]->tx = 0 + 192;
-    class->obj[160]->ty = 0 + 272;
+    class->obj[160]->tx = 192;
+    class->obj[160]->ty = READY_RECT_TY;
     class->obj[160]->Texture = class->texture[0];
     class->obj[160]->alpha = 255;
   }
@@ -305,8 +305,8 @@ void TPuzzleDisp_DispReady(TPuzzleDisp *class, int time)
     class->obj[160]->y = 160;
     class->obj[160]->w = 170;
     class->obj[160]->h = 44;
-    class->obj[160]->tx = 0 + 192;
-    class->obj[160]->ty = 0 + 272;
+    class->obj[160]->tx = 192;
+    class->obj[160]->ty = READY_RECT_TY;
     class->obj[160]->Texture = class->texture[0];
     class->obj[160]->alpha = 255;
   }
@@ -317,8 +317,8 @@ void TPuzzleDisp_DispReady(TPuzzleDisp *class, int time)
     class->obj[160]->y = 160;
     class->obj[160]->w = 114;
     class->obj[160]->h = 44;
-    class->obj[160]->tx = 0 + 192;
-    class->obj[160]->ty = 45 +272;
+    class->obj[160]->tx = 192;
+    class->obj[160]->ty = BOXES_TY+45;
     class->obj[160]->Texture = class->texture[0];
     class->obj[160]->alpha = 255;
     /* - スパークエフェクト */
@@ -347,15 +347,15 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   int  home;
 
   time /= 2;
-  home = 60 - 32;
+  home = GAMEOVER_X;
   /* -- G */
   if (time > 40) {
     mx = home;
-    my = 40;
+    my = GAMEOVER_Y;
   }
   else {
     mx = home + (40 - time) * 12;
-    my = 40 + ((disp_sin[(360 * (40 - time) / 20) % 360] - 0x8000) * (40 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + ((disp_sin[(360 * (40 - time) / 20) % 360] - 0x8000) * (40 - time) * 6) / 0x8000;
   }
   class->obj[160]->DispSw = true;
   class->obj[160]->x = mx;
@@ -363,17 +363,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[160]->w = 38;
   class->obj[160]->h = 52;
   class->obj[160]->tx = 0 + 192;
-  class->obj[160]->ty = 90 + 272;
+  class->obj[160]->ty = 90 + BOXES_TY;
   class->obj[160]->Texture = class->texture[0];
   class->obj[160]->alpha = 255;
   /* -- A */
   if (time > 45) {
     mx = home + 38;
-    my = 40;
+    my = GAMEOVER_Y;
   }
   else {
     mx = home + 38 + (45 - time) * 12;
-    my = 40 + ((disp_sin[(360 * (45 - time) / 20 + 7) % 360] - 0x8000) * (45 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + ((disp_sin[(360 * (45 - time) / 20 + 7) % 360] - 0x8000) * (45 - time) * 6) / 0x8000;
   }
   class->obj[161]->DispSw = true;
   class->obj[161]->x = mx;
@@ -381,17 +381,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[161]->w = 37;
   class->obj[161]->h = 52;
   class->obj[161]->tx = 38 + 192;
-  class->obj[161]->ty = 90 + 272;
+  class->obj[161]->ty = 90 + BOXES_TY;
   class->obj[161]->Texture = class->texture[0];
   class->obj[161]->alpha = 255;
   /* -- M */
   if (time > 50) {
     mx = home + 75;
-    my = 40;
+    my = GAMEOVER_Y;
   }
   else {
     mx = home + 75 + (50 - time) * 12;
-    my = 40 + ((disp_sin[(360 * (50 - time) / 20 + 2) % 360] - 0x8000) * (50 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + ((disp_sin[(360 * (50 - time) / 20 + 2) % 360] - 0x8000) * (50 - time) * 6) / 0x8000;
   }
   class->obj[162]->DispSw = true;
   class->obj[162]->x = mx;
@@ -399,17 +399,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[162]->w = 55;
   class->obj[162]->h = 52;
   class->obj[162]->tx = 75 + 192;
-  class->obj[162]->ty = 90 + 272;
+  class->obj[162]->ty = 90 + BOXES_TY;
   class->obj[162]->Texture = class->texture[0];
   class->obj[162]->alpha = 255;
   /* -- E */
   if (time > 55) {
     mx = home + 130;
-    my = 40;
+    my = GAMEOVER_Y;
   }
   else {
     mx = home + 130 + (55 - time) * 12;
-    my = 40 + ((disp_sin[(360 * (55 - time) / 20 + 6) % 360] - 0x8000) * (55 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + ((disp_sin[(360 * (55 - time) / 20 + 6) % 360] - 0x8000) * (55 - time) * 6) / 0x8000;
   }
   class->obj[163]->DispSw = true;
   class->obj[163]->x = mx;
@@ -417,17 +417,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[163]->w = 31;
   class->obj[163]->h = 52;
   class->obj[163]->tx = 130 + 192;
-  class->obj[163]->ty = 90 + 272;
+  class->obj[163]->ty = 90 + BOXES_TY;
   class->obj[163]->Texture = class->texture[0];
   class->obj[163]->alpha = 255;
   /* -- O */
   if (time > 60) {
     mx = home + 161 - 161;
-    my = 120;
+    my = GAMEOVER_Y + 80;
   }
   else {
     mx = home + 161 - 161 + (60 - time) * 12;
-    my = 120 + ((disp_sin[(360 * (60 - time) / 20 + 4) % 360] - 0x8000) * (60 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + 80 + ((disp_sin[(360 * (60 - time) / 20 + 4) % 360] - 0x8000) * (60 - time) * 6) / 0x8000;
   }
   class->obj[164]->DispSw = true;
   class->obj[164]->x = mx;
@@ -435,17 +435,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[164]->w = 45;
   class->obj[164]->h = 52;
   class->obj[164]->tx = 161 + 192;
-  class->obj[164]->ty = 90 + 272;
+  class->obj[164]->ty = 90 + BOXES_TY;
   class->obj[164]->Texture = class->texture[0];
   class->obj[164]->alpha = 255;
   /* -- V */
   if (time > 65) {
     mx = home + 206 - 161;
-    my = 120;
+    my = GAMEOVER_Y + 80;
   }
   else {
     mx = home + 206 - 161 + (65 - time) * 12;
-    my = 120 + ((disp_sin[(360 * (65 - time) / 20 + 2) % 360] - 0x8000) * (65 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + 80 + ((disp_sin[(360 * (65 - time) / 20 + 2) % 360] - 0x8000) * (65 - time) * 6) / 0x8000;
   }
   class->obj[165]->DispSw = true;
   class->obj[165]->x = mx;
@@ -453,17 +453,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[165]->w = 36;
   class->obj[165]->h = 52;
   class->obj[165]->tx = 206 + 192;
-  class->obj[165]->ty = 90 + 272;
+  class->obj[165]->ty = 90 + BOXES_TY;
   class->obj[165]->Texture = class->texture[0];
   class->obj[165]->alpha = 255;
   /* -- E */
   if (time > 70) {
     mx = home + 242 - 161;
-    my = 120;
+    my = GAMEOVER_Y + 80;
   }
   else {
     mx = home + 242 - 161 + (70 - time) * 12;
-    my = 120 + ((disp_sin[(360 * (70 - time) / 20 + 6) % 360] - 0x8000) * (70 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + 80 + ((disp_sin[(360 * (70 - time) / 20 + 6) % 360] - 0x8000) * (70 - time) * 6) / 0x8000;
   }
   class->obj[166]->DispSw = true;
   class->obj[166]->x = mx;
@@ -471,17 +471,17 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[166]->w = 32;
   class->obj[166]->h = 52;
   class->obj[166]->tx = 242 + 192;
-  class->obj[166]->ty = 90 + 272;
+  class->obj[166]->ty = 90 + BOXES_TY;
   class->obj[166]->Texture = class->texture[0];
   class->obj[166]->alpha = 255;
   /* -- R */
   if (time > 75) {
     mx = home + 274 - 161;
-    my = 120;
+    my = GAMEOVER_Y + 80;
   }
   else {
     mx = home + 274 - 161 + (75 - time) * 12;
-    my = 120 + ((disp_sin[(360 * (75 - time) / 20 + 1) % 360] - 0x8000) * (75 - time) * 6) / 0x8000;
+    my = GAMEOVER_Y + 80 + ((disp_sin[(360 * (75 - time) / 20 + 1) % 360] - 0x8000) * (75 - time) * 6) / 0x8000;
   }
   class->obj[167]->DispSw = true;
   class->obj[167]->x = mx;
@@ -489,7 +489,7 @@ void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time)
   class->obj[167]->w = 34;
   class->obj[167]->h = 52;
   class->obj[167]->tx = 274 + 192;
-  class->obj[167]->ty = 90 + 272;
+  class->obj[167]->ty = 90 + BOXES_TY;
   class->obj[167]->Texture = class->texture[0];
   class->obj[167]->alpha = 255;
 
@@ -561,7 +561,7 @@ static void DispCursor(TPuzzleDisp *class)
   else {
     class->obj[122]->tx = 24 * 3;
   }
-  class->obj[122]->ty = (24 * 2)+272;
+  class->obj[122]->ty = (24 * 2)+BOXES_TY;
   class->obj[122]->Texture = class->texture[0];
   class->obj[122]->alpha = 255;
   /* ----- つかみブロック枠 */
@@ -579,7 +579,7 @@ static void DispCursor(TPuzzleDisp *class)
     else {
       class->obj[121]->tx = 24 * 1;
     }
-    class->obj[121]->ty = (24 * 2)+272;
+    class->obj[121]->ty = (24 * 2)+BOXES_TY;
     class->obj[121]->Texture = class->texture[0];
     class->obj[121]->alpha = 255;
   }
@@ -622,7 +622,7 @@ static void DispBlock(TPuzzleDisp *class)
         class->obj[10+i]->w = BLOCK_WIDTH;
         class->obj[10+i]->h = BLOCK_HEIGHT;
         class->obj[10+i]->tx = colx;
-        class->obj[10+i]->ty = coly + 272;
+        class->obj[10+i]->ty = coly + BOXES_TY;
         class->obj[10+i]->Texture = class->texture[0];
         class->obj[10+i]->alpha = 255;
         /* --- 消えエフェクト中か */
@@ -682,25 +682,37 @@ static void DispBack(TPuzzleDisp *class)
   /* -------------------------------------- */
   /* --- 隠すべき枠 */
   class->obj[115]->DispSw = true;
-  class->obj[115]->x = 4;
-  class->obj[115]->y = 220;
+  class->obj[115]->x = BLOCKER_X;
+  class->obj[115]->y = BLOCKER_1Y;
   class->obj[115]->w = 192;
-  class->obj[115]->h = 4;
-  class->obj[115]->tx = 4;
-  class->obj[115]->ty = 220;
+  class->obj[115]->h = BLOCKER_1H;
+  class->obj[115]->tx = BLOCKER_X;
+  class->obj[115]->ty = BLOCKER_1Y;
   class->obj[115]->Texture = class->texture[0];
   class->obj[115]->alpha = 255;
+
   class->obj[116]->DispSw = true;
-  class->obj[116]->x = 81;
+  class->obj[116]->x = BLOCKER_2X;
   class->obj[116]->y = 0;
   class->obj[116]->w = 192;
-  class->obj[116]->h = 4;
-  class->obj[116]->tx = 81;
+  class->obj[116]->h = BLOCKER_2H;
+  class->obj[116]->tx = BLOCKER_2X;
   class->obj[116]->ty = 0;
   class->obj[116]->Texture = class->texture[0];
   class->obj[116]->alpha = 255;
-}
 
+#ifdef BLOCKER_3_NEEDED
+  class->obj[117]->DispSw = true;
+  class->obj[117]->x = 81;
+  class->obj[117]->y = 344;
+  class->obj[117]->w = 192;
+  class->obj[117]->h = 16;
+  class->obj[117]->tx = 81;
+  class->obj[117]->ty = 344;
+  class->obj[117]->Texture = class->texture[0];
+  class->obj[117]->alpha = 255;
+#endif
+}
 
 /* ---------------------------------------- */
 /* --- キャラクターの表示                   */
@@ -716,16 +728,16 @@ static void DispChara(TPuzzleDisp *class)
   class->obj[9]->x = class->fieldpos_x;
   class->obj[9]->y = FIELDTOP;
   class->obj[9]->w = 192;
-  class->obj[9]->h = 240 - 23;
+  class->obj[9]->h = CHARA_H;
   class->obj[9]->tx = animekoma_x[koma] * 192;
-  class->obj[9]->ty = animekoma_y[koma] + 16;
+  class->obj[9]->ty = animekoma_y[koma] + KOMA_OFFSET;
   class->obj[9]->Texture = class->texture[3];
   class->obj[9]->alpha = 255;
   /* --- 後ろのタヌキ絵 */
   for(i=0; i<4; i++) {
     class->tanuki[i].y = class->tanuki[i].y - 1;
     if (class->tanuki[i].y < 0) {
-      class->tanuki[i].y = 340 + rand() % 40;
+      class->tanuki[i].y = TANUKI_Y + rand() % 40;
       class->tanuki[i].x = rand() % (BLOCK_WIDTH*FIELD_WIDTH - 60);
     }
     tanux = disp_sin[(int)(360*(class->tanuki[i].y % 120) / 120)%360] * 8 / 0x10000;
@@ -735,7 +747,7 @@ static void DispChara(TPuzzleDisp *class)
     class->obj[i+2]->w = 36;
     class->obj[i+2]->h = 22;
     class->obj[i+2]->tx = 72;
-    class->obj[i+2]->ty = 72 + 272;
+    class->obj[i+2]->ty = 72 + BOXES_TY;
     class->obj[i+2]->Texture = class->texture[0];
     class->obj[i+2]->alpha = 255;
   }
@@ -757,7 +769,7 @@ static void DispNext(TPuzzleDisp *class)
   class->obj[120]->w = 32;
   class->obj[120]->h = 16;
   class->obj[120]->tx = mode;
-  class->obj[120]->ty = 72 + 272;
+  class->obj[120]->ty = 72 + BOXES_TY;
   class->obj[120]->Texture = class->texture[0];
   class->obj[120]->alpha = 255;
 }
@@ -775,7 +787,7 @@ static void DispScore(TPuzzleDisp *class)
   /* 179-183 : block num (424x96) */
   /* 184-185 : score num (436x144) */
 
-  int shift = 152;
+  int shift = SCORE_SHIFT;
   /* ------------------------------ */
   /* --- 文字 */
   class->obj[168]->DispSw = true;
@@ -784,7 +796,7 @@ static void DispScore(TPuzzleDisp *class)
   class->obj[168]->w = 48;
   class->obj[168]->h = 18;
   class->obj[168]->tx = 0 + 368;
-  class->obj[168]->ty = 16 + 272;
+  class->obj[168]->ty = 16 + BOXES_TY;
   class->obj[168]->Texture = class->texture[0];
   class->obj[168]->alpha = 255;
   class->obj[169]->DispSw = true;
@@ -793,7 +805,7 @@ static void DispScore(TPuzzleDisp *class)
   class->obj[169]->w = 100;
   class->obj[169]->h = 18;
   class->obj[169]->tx = 0 + 368;
-  class->obj[169]->ty = 34 + 272;
+  class->obj[169]->ty = 34 + BOXES_TY;
   class->obj[169]->Texture = class->texture[0];
   class->obj[169]->alpha = 255;
   class->obj[170]->DispSw = true;
@@ -802,7 +814,7 @@ static void DispScore(TPuzzleDisp *class)
   class->obj[170]->w = 43;
   class->obj[170]->h = 18;
   class->obj[170]->tx = 0 + 368;
-  class->obj[170]->ty = 52 + 272;
+  class->obj[170]->ty = 52 + BOXES_TY;
   class->obj[170]->Texture = class->texture[0];
   class->obj[170]->alpha = 255;
   DispNum(class, 400 - shift, 48, 8, 171, class->super->Score);
@@ -846,7 +858,7 @@ static void DispNum(TPuzzleDisp *class, int x, int y, int n, int o, int num)
       class->obj[o]->w = 8;
       class->obj[o]->h = 16;
       class->obj[o]->tx = c * 8 + 368;
-      class->obj[o]->ty = 0 + 272;
+      class->obj[o]->ty = 0 + BOXES_TY;
       class->obj[o]->Texture = class->texture[0];
       class->obj[o]->alpha = 255;
     }
@@ -889,7 +901,7 @@ static void DispKira(TPuzzleDisp *class)
       class->kirakira[i].obj->w = 11;
       class->kirakira[i].obj->h = 11;
       class->kirakira[i].obj->tx = 144;
-      class->kirakira[i].obj->ty = 48 + 272;
+      class->kirakira[i].obj->ty = 48 + BOXES_TY;
       class->kirakira[i].obj->Texture = class->texture[0];
       class->kirakira[i].obj->alpha = alpha;
       /* -- 表示時間の管理 */
