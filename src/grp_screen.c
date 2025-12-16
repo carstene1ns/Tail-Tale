@@ -30,7 +30,7 @@
 /*-------------------------------*/
 
 #include <stdlib.h>
-#include <SDL_image.h>
+#include "cute_png.h"
 #include "grp_screen.h"
 #include "debug.h"
 
@@ -185,7 +185,25 @@ void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename)
   printf("Loading %s\n", name);
 #endif
 
-  SDL_Texture *plane = IMG_LoadTexture(class->Renderer, name);
+  cp_image_t png = cp_load_png(name);
+  if (!png.pix) {
+    printf("...failed: %s\n", cp_error_reason);
+    class->Textures[num] = NULL;
+    return;
+  }
+
+  SDL_Surface *temp = SDL_CreateRGBSurfaceWithFormatFrom(png.pix, png.w, png.h,
+                                                         0, png.w*4,
+                                                         SDL_PIXELFORMAT_RGBA32);
+  if (!temp) {
+    cp_free_png(&png);
+    class->Textures[num] = NULL;
+    return;
+  }
+
+  SDL_Texture *plane = SDL_CreateTextureFromSurface(class->Renderer, temp);
+  SDL_FreeSurface(temp);
+  cp_free_png(&png);
   if (!plane) {
     class->Textures[num] = NULL;
     return;

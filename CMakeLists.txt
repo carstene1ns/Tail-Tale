@@ -22,7 +22,9 @@ set(CMAKE_C_STANDARD 99)
 # Get the dependency libraries
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
-find_package(SDL2_image REQUIRED)
+
+add_library(cute_png STATIC
+	src/cute_png.h src/cute_png.c)
 
 # Define the source files
 add_executable(tailtale WIN32
@@ -61,7 +63,7 @@ endif()
 
 # Link the dependencies
 target_link_libraries(tailtale PRIVATE
-	SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2::SDL2)
+	cute_png SDL2_mixer::SDL2_mixer SDL2::SDL2)
 if(UNIX)
 	target_link_libraries(tailtale PRIVATE m)
 endif()

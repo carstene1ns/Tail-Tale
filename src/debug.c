@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <SDL.h>
-#include <SDL_image.h>
+#include "cute_png.h"
 #include "debug.h"
 #include "grp_screen.h"
 
@@ -100,7 +100,16 @@ void TDebugInit(TGameScreen *screen, int Width, int Height)
 {
   StockNum = 0;
   UseDebug = true;
-  AsciiFont = IMG_Load(TextureName);
+
+  cp_image_t png = cp_load_png(TextureName);
+  if (!png.pix) {
+    printf("Loading %s failed: %s\n", TextureName, cp_error_reason);
+    UseDebug = false;
+    return;
+  }
+
+  AsciiFont = SDL_CreateRGBSurfaceWithFormatFrom(png.pix, png.w, png.h, 0,
+                                                 png.w*4, SDL_PIXELFORMAT_RGBA32);
   if (!AsciiFont) {
     UseDebug = false;
     return;
@@ -125,6 +134,7 @@ void TDebugInit(TGameScreen *screen, int Width, int Height)
 void TDebugFree()
 {
   SDL_FreeSurface(AsciiPlane);
+  free(AsciiFont->pixels);
   SDL_FreeSurface(AsciiFont);
   SDL_DestroyTexture(AsciiTex);
   UseDebug = false;
