@@ -20,17 +20,11 @@
  All Rights Reserved.
  ------------------------------------------------------*/
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
-
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstring>
 #include <unistd.h>
-#include <SDL.h>
 #include <SDL_mixer.h>
-#include  "sound.h"
+#include "sound.hpp"
 
 /*-------------------------------*/
 /* define                        */
@@ -38,22 +32,27 @@
 
 #define SECHANMAX 8
 
+/* --- VOUME の最大値 */
+#define VOLUMEDEFAULT MIX_MAX_VOLUME/2.f
+
 /*-------------------------------*/
-/* local value                   */
+/* local value/function          */
 /*-------------------------------*/
 
-/* ----- BGM トラック */
-static Mix_Music *SoundTrack;
-static char BGMPool[BGMMAX][256];
+namespace {
+  /* ----- BGM トラック */
+  Mix_Music *SoundTrack;
+  char BGMPool[BGMMAX][256];
 
-/* ----- BGM トラック */
-static Mix_Chunk *SEPool[SEMAX];
+  /* ----- BGM トラック */
+  Mix_Chunk *SEPool[SEMAX];
 
-/* ----- サウンド有効フラグ */
-static bool SoundEnable;
+  /* ----- サウンド有効フラグ */
+  bool SoundEnable;
 
-/* ----- サウンドチャンネルのトラック */
-static int track;
+  /* ----- サウンドチャンネルのトラック */
+  int track;
+}
 
 /* -------------------------------------------------------------- */
 /* --- サウンド                                                   */
@@ -62,7 +61,7 @@ static int track;
 /* ---------------------------------------- */
 /* --- サウンドの初期とリスト読み込み       */
 /* ---------------------------------------- */
-void SoundInit(void)
+TSound::TSound()
 {
   track = 0;
   SoundTrack = NULL;
@@ -118,11 +117,10 @@ void SoundInit(void)
   }
 }
 
-
 /* ---------------------------------------- */
 /* --- サウンドの解放                       */
 /* ---------------------------------------- */
-void SoundFree(void)
+TSound::~TSound()
 {
   if (!SoundEnable) return;
 
@@ -153,7 +151,7 @@ void SoundFree(void)
 /* ---------------------------------------- */
 /* --- BGM のリクエスト                     */
 /* ---------------------------------------- */
-static void Music(int req, bool oneShot)
+void TSound::Music(int req, bool oneShot)
 {
   if (!SoundEnable) return;
 
@@ -185,24 +183,10 @@ static void Music(int req, bool oneShot)
 
 }
 
-void SoundMusic(int req)
-{
-  Music(req, false);
-}
-
-/* ---------------------------------------- */
-/* --- 繰り返さない BGM のリクエスト        */
-/* ---------------------------------------- */
-void SoundMusicOneshot(int req)
-{
-  Music(req, true);
-}
-
-
 /* ---------------------------------------- */
 /* --- SE のリクエスト                      */
 /* ---------------------------------------- */
-void SoundSE(int req)
+void TSound::SE(int req)
 {
   if (!SoundEnable) return;
 
@@ -219,7 +203,7 @@ void SoundSE(int req)
 /* ---------------------------------------- */
 /* --- BGM トラックの停止                   */
 /* ---------------------------------------- */
-void SoundMusicStop(void)
+void TSound::MusicStop()
 {
   if (!SoundEnable) return;
 
@@ -230,7 +214,7 @@ void SoundMusicStop(void)
 /* ---------------------------------------- */
 /* --- SE の全停止                          */
 /* ---------------------------------------- */
-void SoundSEStop(void)
+void TSound::SEStop()
 {
   if (!SoundEnable) return;
 
@@ -244,7 +228,7 @@ void SoundSEStop(void)
 /* ---------------------------------------- */
 /* --- Volume値の設定                      */
 /* ---------------------------------------- */
-void SoundVolume(int value)
+void TSound::Volume(int value)
 {
   if (value > MIX_MAX_VOLUME) {
     value = MIX_MAX_VOLUME;

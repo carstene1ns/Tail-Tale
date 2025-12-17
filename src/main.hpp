@@ -10,10 +10,10 @@
 /*                                                        */
 /*--------------------------------------------------------*/
 
-#ifndef BOOTMAIN_H
-#define BOOTMAIN_H
+#ifndef MAIN_HPP
+#define MAIN_HPP
 
-#include "puz_res.h"
+#include "puz_res.hpp"
 
 /* ------------------------------------------------ */
 /* --- define                                       */
@@ -24,6 +24,6 @@
 #define FRAME_SKIP_MAX  6
 
 /* ----- window title */
-char *WindowName = "Shippo no Puzzle - Tail Tale";
+const char *WindowName = "Shippo no Puzzle - Tail Tale";
 
-#endif //BOOTMAIN_H
+#endif //MAIN_HPP

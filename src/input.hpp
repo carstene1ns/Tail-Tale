@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------- */
-/*  debug.h                                                   */
+/*  input.h                                                   */
 /* ---------------------------------------------------------- */
 
 /*--------------------------------------------------------*/
@@ -8,61 +8,68 @@
 /*                        Fumi2Kick/LiMo/omamori-2002     */
 /*                        1st Maintaner  Rerorero@fumi.   */
 /*                                                        */
-/*   debug.pp                                             */
-/*     デバッグ用チェックルーチン                         */
+/*   input.h                                              */
+/*     入力装置読みとり部分                               */
 /*                                                        */
 /*--------------------------------------------------------*/
 
 /*------------------------------------------------------------- */
 /** @file
-    @brief		デバッグチェックルーチン
+    @brief		インプットマネージ
     @author		K.Kunikane (rerofumi)
-    @since		Jul.27.2005
+    @since		Jul.29.2005
 */
 /*-----------------------------------------------------
  Copyright (C) 2002,2005 rerofumi <rero2@yuumu.org>
  All Rights Reserved.
  ------------------------------------------------------*/
 
-#ifndef DEBUG_H
-#define DEBUG_H
-
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
-
-#include "grp_screen.h"
+#ifndef INPUT_HPP
+#define INPUT_HPP
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
 
-/* ----- メッセージの表示量 */
-#define  MessageMax  20
+enum IN {
+  IN_None     = 0,
+  IN_Up       = 1 << 0,
+  IN_Down     = 1 << 1,
+  IN_Left     = 1 << 2,
+  IN_Right    = 1 << 3,
+  IN_Button1  = 1 << 4,
+  IN_Button2  = 1 << 5,
+  IN_Button3  = 1 << 6,
+  IN_Button4  = 1 << 7,
+  IN_Button5  = 1 << 8,
+  IN_Button6  = 1 << 9,
+  IN_Button7  = 1 << 10,
+  IN_Button8  = 1 << 11,
+  IN_Button9  = 1 << 12,
+  IN_Button10 = 1 << 13,
+  IN_Button11 = 1 << 14,
+  IN_Button12 = 1 << 15
+};
 
-#ifdef DEBUG
- #define DEBUGPRINT(FMT, ...) \
-    snprintf(debug_line, 127, FMT, __VA_ARGS__); \
-    TDebugPrint(debug_line);
-#else
- #define DEBUGPRINT(FMT, ...) 
-#endif
+/* --- ジョイスティック最大数 */
+#define JOY_NUM_MAX 2
 
-/*-------------------------------*/
-/* struct                        */
-/*-------------------------------*/
-
-extern char debug_line[128];
+/* --- ジョイスティックの遊び計数 */
+#define JOY_STICK_DITHER 20000
 
 /* ---------------------------------------------- */
-/* --- extern                                  -- */
+/* --- class                                   -- */
 /* ---------------------------------------------- */
+class TInput {
+public:
+  TInput();
+  ~TInput();
 
-void TDebugInit(TGameScreen *screen, int Width, int Height);
-void TDebugFree();
-void TDebugDisp(TGameScreen *screen);
-void TDebugPrint(char *mes);
-void IntToStr(int num, char *buf);
-void IntToHex(int num, int length, char *buf);
+  void Poll();
+  bool Exit();
+  int JoyKeyDown(int side);
+  int JoyKeyTriger(int side);
+  void JoyKeySwap(bool sw);
+};
 
-#endif //DEBUG_H
+#endif //INPUT.HPP

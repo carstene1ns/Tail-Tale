@@ -13,23 +13,23 @@
 /*                                                        */
 /*--------------------------------------------------------*/
 
-#ifndef GAMEMAIN_H
-#define GAMEMAIN_H
+#ifndef GAME_HPP
+#define GAME_HPP
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
+#include "support.hpp"
 
-#include <SDL.h>
-#include "grp_screen.h"
-#include "puz_trial.h"
+class TGameScreen;
+struct TGameSprite;
+class TPuzzleTrial;
+class TSound;
+class TInput;
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
 
 /* --- ゲームステップのラベル */
-enum MainStep {
+enum class Step {
   TitleInit,
   TitleIn,
   TitleMain,
@@ -43,30 +43,32 @@ enum MainStep {
   ConfigFree
 };
 
-/*-------------------------------*/
-/* struct                        */
-/*-------------------------------*/
-
-typedef struct {
-  int  titletimer;
-  SDL_Texture  *tex;
-  TGameSprite  *bg, *logo, *push, *release, *select_level;
-  TGameScreen  *screen;
-  int  sound_volume;
-  int  control_reverse;
-  int  control_anime;
-  int  control_anime_y;
-  int  level;
-  int  step;
-  TPuzzleTrial  *puzzle;
-} TGameMain, *PTGameMain;
-
 /* ---------------------------------------------- */
-/* --- extern                                  -- */
+/* --- class                                   -- */
 /* ---------------------------------------------- */
+class TGame {
+public:
+  TGame() = delete;
+  explicit TGame(TGameScreen *scr, TSound *snd, TInput *inp);
+  TGame(const TGame&) = delete;
+  TGame& operator=(const TGame&) = delete;
 
-TGameMain *TGameMain_Create(TGameScreen *mainscreen);
-void TGameMain_Destroy(TGameMain *class);
-bool TGameMain_Poll(TGameMain *class, int counter);
+  bool Poll(int counter);
 
-#endif //GAMEMAIN_H
+  TGameScreen *screen;
+  TSound *sound;
+  TInput *input;
+
+private:
+  int titletimer;
+  TGameSprite *bg, *logo, *push, *release, *select_level;
+  int sound_volume;
+  int control_reverse;
+  int control_anime;
+  int control_anime_y;
+  int level;
+  Step step;
+  unique_ptr<TPuzzleTrial> puzzle;
+};
+
+#endif //GAME_HPP

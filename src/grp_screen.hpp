@@ -24,16 +24,12 @@
  All Rights Reserved.
  ------------------------------------------------------*/
 
-
 #ifndef GRP_SCREEN_H
 #define GRP_SCREEN_H
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
-
 #include <SDL.h>
-#include "grp_sprite.h"
+#include "support.hpp"
+#include "grp_sprite.hpp"
 
 /*-------------------------------*/
 /* define                        */
@@ -45,32 +41,35 @@
 /* --- 管理する最大スプライト数 */
 #define SPRITEMAX 1024
 
-/*-------------------------------*/
-/* struct                        */
-/*-------------------------------*/
+/* ---------------------------------------------- */
+/* --- class                                   -- */
+/* ---------------------------------------------- */
+class TGameScreen {
+public:
+  TGameScreen() = delete;
+  explicit TGameScreen(int width, int height, const char *title);
+  ~TGameScreen();
+  TGameScreen(const TGameScreen&) = delete;
+  TGameScreen& operator=(const TGameScreen&) = delete;
 
-typedef struct {
-  SDL_Window   *Window;
+  void SetWMName(char *name);
+  void DispScreen();
+  void RefreshScreen();
+  TGameSprite *GetSprite(int id) const;
+  SDL_Texture *GetTexture(int id) const;
+  void LoadTexture(int num, const char *filename);
+
+private:
+  /* --- スプライトを一枚スクリーンに貼り付ける */
+  void Render(TGameSprite *spr);
+
+public:
   SDL_Renderer *Renderer;
-  SDL_Texture  *Textures[TEXTUREMAX];
-  TGameSprite  *Sprites[SPRITEMAX];
-  int Width;
-  int Height;
   int pixelFormat;
-} TGameScreen, *PTGameScreen;
-
-
-/* ---------------------------------------------- */
-/* --- extern                                  -- */
-/* ---------------------------------------------- */
-
-TGameScreen *TGameScreen_Create(int width, int height, const char *title);
-void TGameScreen_Destroy(TGameScreen *class);
-void TGameScreen_SetWMName(TGameScreen *class, char *name);
-void TGameScreen_DispScreen(TGameScreen *class);
-void TGameScreen_RefreshScreen(TGameScreen *class);
-TGameSprite *TGameScreen_GetSprite(TGameScreen *class, int id);
-SDL_Texture *TGameScreen_GetTexture(TGameScreen *class, int id);
-void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename);
+  SDL_Window *Window;
+  SDL_Texture *Textures[TEXTUREMAX];
+  unique_ptr<TGameSprite> Sprites[SPRITEMAX];
+  int Width, Height;
+};
 
 #endif //GRP_SCREEN_H

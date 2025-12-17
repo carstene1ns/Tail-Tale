@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.18...4.0)
 
 # Define the metadata
 project(Tail-Tale
-	VERSION 1.0.3
+	VERSION 1.0.4
 	DESCRIPTION ""
 	HOMEPAGE_URL ""
-	LANGUAGES C)
+	LANGUAGES CXX)
 
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -17,28 +17,35 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 		"MinSizeRel" "RelWithDebInfo")
 endif()
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 14)
 
 # Get the dependency libraries
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 
+# Bug/Leak finding
+option(WITH_SANITIZERS "Build with enabled sanitizers" OFF)
+if(WITH_SANITIZERS)
+	add_compile_options(-fsanitize=undefined -fsanitize=address)
+	add_link_options(-fsanitize=undefined -fsanitize=address)
+endif()
+
 add_library(cute_png STATIC
-	src/cute_png.h src/cute_png.c)
+	src/cute_png.hpp src/cute_png.cpp)
 
 # Define the source files
 add_executable(tailtale WIN32
-	src/bootmain.c src/bootmain.h
-	src/debug.c src/debug.h
-	src/gamemain.c src/gamemain.h
-	src/grp_screen.c src/grp_screen.h
-	src/grp_sprite.c src/grp_sprite.h
-	src/input.c src/input.h
-	src/puz_res.h
-	src/puz_base.c src/puz_base.h
-	src/puz_disp.c src/puz_disp.h
-	src/puz_trial.c src/puz_trial.h
-	src/sound.c src/sound.h)
+	src/main.cpp src/main.hpp
+	src/debug.cpp src/debug.hpp
+	src/game.cpp src/game.hpp
+	src/grp_screen.cpp src/grp_screen.hpp
+	src/grp_sprite.hpp
+	src/input.cpp src/input.hpp
+	src/puz_res.hpp
+	src/puz_base.cpp src/puz_base.hpp
+	src/puz_disp.cpp src/puz_disp.hpp
+	src/puz_trial.cpp src/puz_trial.hpp
+	src/sound.cpp src/sound.hpp)
 
 # Game data
 if(UNIX)
@@ -50,7 +57,7 @@ endif()
 set(DATA_PREFIX "${DEFAULT_PREFIX}/" CACHE PATH "Where game data is located")
 
 # Define the compilation flags
-target_compile_options(tailtale PRIVATE -Wall)
+target_compile_options(tailtale PRIVATE -Wall -fno-exceptions -fno-rtti)
 target_compile_definitions(tailtale PRIVATE DATA_PREFIX="${DATA_PREFIX}")
 option(HIGH_QUALITY "Render in 480x360 instead of 320x240" ON)
 if(HIGH_QUALITY)

@@ -13,15 +13,17 @@
 /*                                                        */
 /*--------------------------------------------------------*/
 
-#ifndef PUZ_DISP_H
-#define PUZ_DISP_H
+#ifndef PUZ_DISP_HPP
+#define PUZ_DISP_HPP
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
+#include "support.hpp"
+#include "puz_res.hpp"
+#include "puz_base.hpp"
 
-#include "grp_screen.h"
-#include "puz_res.h"
+class TGame;
+class TGameScreen;
+struct TGameSprite;
+struct SDL_Texture;
 
 /*-------------------------------*/
 /* define                        */
@@ -32,10 +34,10 @@
 #define TEXMAX   5
 #define KIRAMAX  36
 
-enum GameMode {
-  MODE_CHALLENGE,
-  MODE_1P,
-  MODE_2P
+enum class GameMode {
+  CHALLENGE,
+  MODE1P,
+  MODE2P
 };
 
 /*-------------------------------*/
@@ -59,49 +61,64 @@ typedef struct {
   /* - 移動量 */
   int  dx;
   int  dy;
-} Kira, *PKira;
+} Kira;
 
 /* -------------------------------- */
 /* --- 背景のタヌキ座標 */
 typedef struct {
   int  x, y;
-} TanuPos, PTanuPos;
+} TanuPos;
 
-
-/* -------------------------------- */
+/* ---------------------------------------------- */
+/* --- class                                   -- */
+/* ---------------------------------------------- */
 /* --- クラスメンバー */
-typedef struct {
+class TPuzzleDisp {
+public:
+  TPuzzleDisp() = delete;
+  explicit TPuzzleDisp(GameMode mode, int level, TGame *game);
+  ~TPuzzleDisp();
+  TPuzzleDisp(const TPuzzleDisp&) = delete;
+  TPuzzleDisp& operator=(const TPuzzleDisp&) = delete;
+
+  void DispField();
+  void DispReady(int time);
+  void DispGameover(int time);
+  void DispClear();
+  void KiraRequest(int x, int y, int l);
+
+private:
+  void DispCursor();
+  void DispBlock();
+  void DispEraseBlock(TGameSprite *obj, Block *bl);
+  void DispBack();
+  void DispChara();
+  void DispNext();
+  void DispScore();
+  void DispNum(int x, int y, int n, int o, int num);
+  void DispKira();
+
+public:
   /* - 親クラス */
-  TPuzzleBase  *super;
+  unique_ptr<TPuzzleBase> base;
   /* - ゲームモード */
-  int  puz_mode;
+  GameMode puz_mode;
   /* - 表示位置指定 */
-  int  fieldpos_x;
+  int fieldpos_x;
   /* - 表示用オブジェクトポインター */
-  TGameSprite  *obj[OBJMAX];
+  TGameSprite *obj[OBJMAX];
   /* - テクスチャーポインター */
-  SDL_Texture  *texture[TEXMAX];
-  /* --- private */
+  SDL_Texture *texture[TEXMAX];
+
+private:
   /* - きらきらエフェクト */
-  Kira  kirakira[KIRAMAX];
+  Kira kirakira[KIRAMAX];
   /* - タヌキ表示 */
-  TanuPos  tanuki[4];
+  TanuPos tanuki[4];
   /* - スクリーンの保持 */
-  TGameScreen  *screen;
+  const TGameScreen *screen;
   /* - 表示用タイマー */
-  int  disptimer;
-} TPuzzleDisp, *PTPuzzleDisp;
+  int disptimer;
+};
 
-/* ---------------------------------------------- */
-/* --- extern                                  -- */
-/* ---------------------------------------------- */
-
-TPuzzleDisp *TPuzzleDisp_Create(int  mode, int level, TGameScreen *scr);
-void TPuzzleDisp_Destroy(TPuzzleDisp *class);
-void TPuzzleDisp_DispField(TPuzzleDisp *class);
-void TPuzzleDisp_DispReady(TPuzzleDisp *class, int time);
-void TPuzzleDisp_DispGameover(TPuzzleDisp *class, int time);
-void TPuzzleDisp_DispClear(TPuzzleDisp *class);
-void TPuzzleDisp_KiraRequest(TPuzzleDisp *class, int x, int y, int l);
-
-#endif //PUZ_DISP_H
+#endif //PUZ_DISP_HPP

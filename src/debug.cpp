@@ -24,16 +24,12 @@
  All Rights Reserved.
  ------------------------------------------------------*/
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
-
 #include <stdlib.h>
 #include <string.h>
 #include <SDL.h>
-#include "cute_png.h"
-#include "debug.h"
-#include "grp_screen.h"
+#include "cute_png.hpp"
+#include "debug.hpp"
+#include "grp_screen.hpp"
 
 /*-------------------------------*/
 /* local value                   */
@@ -54,11 +50,7 @@ static char StockString[MessageMax][128];
 static int StockNum;
 
 /* ----- アスキーテクスチャー名 */
-#ifdef DATA_PREFIX
-static char *TextureName = DATA_PREFIX "/gfx/ascii.png";
-#else
-static char *TextureName = "./gfx/data/ascii.png";
-#endif
+#define TEXTURENAME "ascii.png"
 
 /* --- デバッグフォント文字列 */
 char debug_line[128];
@@ -96,14 +88,21 @@ static void print_msg(char *mes, int disp_x, int disp_y)
 /* ---------------------------------------- */
 /* --- デバッグフェイス初期化               */
 /* ---------------------------------------- */
-void TDebugInit(TGameScreen *screen, int Width, int Height)
+void TDebugInit(TGameScreen *screen)
 {
   StockNum = 0;
   UseDebug = true;
 
-  cp_image_t png = cp_load_png(TextureName);
+  char name[256];
+#ifdef DATA_PREFIX
+  snprintf(name, sizeof(name), "%s/gfx/%s", DATA_PREFIX, TEXTURENAME);
+#else
+  snprintf(name, sizeof(name), "./data/gfx/%s", TEXTURENAME);
+#endif
+
+  cp_image_t png = cp_load_png(name);
   if (!png.pix) {
-    printf("Loading %s failed: %s\n", TextureName, cp_error_reason);
+    printf("Loading %s failed: %s\n", name, cp_error_reason);
     UseDebug = false;
     return;
   }
@@ -115,11 +114,12 @@ void TDebugInit(TGameScreen *screen, int Width, int Height)
     return;
   }
 
-  AsciiPlane = SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 0,
+  AsciiPlane = SDL_CreateRGBSurfaceWithFormat(0, screen->Width, screen->Height, 0,
                                               screen->pixelFormat);
 
   AsciiTex = SDL_CreateTexture(screen->Renderer, screen->pixelFormat,
-                               SDL_TEXTUREACCESS_STREAMING, Width, Height);
+                               SDL_TEXTUREACCESS_STREAMING,
+                               screen->Width, screen->Height);
   SDL_SetTextureBlendMode(AsciiTex, SDL_BLENDMODE_BLEND);
 
   if (!AsciiPlane || !AsciiTex) {
@@ -146,23 +146,16 @@ void TDebugFree()
 /* ---------------------------------------- */
 void TDebugDisp(TGameScreen *screen)
 {
-  int  disp_x, disp_y;
-  int  disp_edge;
-  SDL_Rect  rect1, rect2;
-  int  i;
-
   /* --- 準備が出来ていなかったら回避 */
-  if (!UseDebug) {
-    return;
-  }
+  if (!UseDebug) return;
 
   /* --- 表示キューに積まれている分だけ表示 */
-  disp_x = 0;
-  disp_y = 0;
-  disp_edge = 0;
-  for(i=0; i<StockNum; i++) {
+  int disp_x = 0;
+  int disp_y = 0;
+  int disp_edge = 0;
+  for(int i=0; i<StockNum; i++) {
     print_msg(StockString[i], disp_x, disp_y);
-    if (disp_edge < (strlen(StockString[i]) * 8)) {
+    if ((unsigned)disp_edge < (strlen(StockString[i]) * 8)) {
       disp_edge = strlen(StockString[i]) * 8;
     }
     disp_y = disp_y + 8;
@@ -170,18 +163,13 @@ void TDebugDisp(TGameScreen *screen)
 
   /* --- アスキープレーンをスクリーンに */
   if (disp_edge > 0) {
-    rect1.x = 0;
-    rect1.y = 0;
-    rect1.w = disp_edge;
-    rect1.h = disp_y;
-    rect2.x = 0;
-    rect2.y = 0;
-    rect2.w = disp_edge;
-    rect2.h = disp_y;
+    SDL_Rect rect1{0, 0, disp_edge, disp_y};
+    SDL_Rect rect2{0, 0, disp_edge, disp_y};
     SDL_UpdateTexture(AsciiTex, NULL, AsciiPlane->pixels, AsciiPlane->pitch);
     SDL_RenderCopy(screen->Renderer, AsciiTex, &rect1, &rect2);
     SDL_FillRect(AsciiPlane, NULL, SDL_MapRGBA(AsciiPlane->format,0xff,0xff,0xff,0x00));
   }
+
   StockNum = 0;  
 }
 

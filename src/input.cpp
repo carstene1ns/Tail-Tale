@@ -28,34 +28,32 @@
 /* include                       */
 /*-------------------------------*/
 
-#include "input.h"
+#include "input.hpp"
 #include <SDL.h>
-
-/*-------------------------------*/
-/* define                        */
-/*-------------------------------*/
 
 /*-------------------------------*/
 /* local value                   */
 /*-------------------------------*/
 
-/* ----- ユーザーのゲーム操作 */
-static SDL_Joystick *JoyPtr[JOY_NUM_MAX];
-static unsigned long JoyKey[JOY_NUM_MAX];
-static unsigned long JoyStick[JOY_NUM_MAX];
-static unsigned long JoyKeyPast[JOY_NUM_MAX];
-static unsigned long JoyStickPast[JOY_NUM_MAX];
+namespace {
+  /* ----- ユーザーのゲーム操作 */
+  SDL_Joystick *JoyPtr[JOY_NUM_MAX];
+  unsigned long JoyKey[JOY_NUM_MAX];
+  unsigned long JoyStick[JOY_NUM_MAX];
+  unsigned long JoyKeyPast[JOY_NUM_MAX];
+  unsigned long JoyStickPast[JOY_NUM_MAX];
 
-/* ----- ジョイスティックの情報 */
-/*  まあ、一応情報として  */
-static int JoyStickAxes[JOY_NUM_MAX];
-static int JoyStickButtons[JOY_NUM_MAX];
+  /* ----- ジョイスティックの情報 */
+  /*  まあ、一応情報として  */
+  int JoyStickAxes[JOY_NUM_MAX];
+  int JoyStickButtons[JOY_NUM_MAX];
 
-/* ----- 終了キーフラグ */
-static int AppExit;
+  /* ----- 終了キーフラグ */
+  bool AppExit;
 
-/* ----- GP2X キー設定コンフィギュレーション */
-static bool GpKeySwap;
+  /* ----- GP2X キー設定コンフィギュレーション */
+  bool GpKeySwap;
+}
 
 /* -------------------------------------------------------------- */
 /* --- 入力管理                                                   */
@@ -90,9 +88,9 @@ static void key_read_down(SDL_KeyboardEvent *key)
     JoyKey[0] = JoyKey[0] | IN_Button8;
 
   if (key->keysym.sym == SDLK_q)
-    AppExit = 1;
+    AppExit = true;
   if (key->keysym.sym == SDLK_ESCAPE)
-    AppExit = 1;
+    AppExit = true;
 }
 
 static void key_read_up(SDL_KeyboardEvent *key)
@@ -152,7 +150,6 @@ static void joy_read_stick(SDL_JoyAxisEvent *stick)
     break;
   }
 }
-
 
 static void joy_read_button_up(SDL_JoyButtonEvent *btn)
 {
@@ -235,7 +232,7 @@ static void joy_read_button_down(SDL_JoyButtonEvent *btn)
 /* ---------------------------------------- */
 /* --- 入力装置の初期設定                   */
 /* ---------------------------------------- */
-void InputInit(void)
+TInput::TInput()
 {
   GpKeySwap = false;
 
@@ -261,11 +258,10 @@ void InputInit(void)
   }
 }
 
-
 /* ---------------------------------------- */
 /* --- 入力装置の解放                       */
 /* ---------------------------------------- */
-void InputFree(void)
+TInput::~TInput()
 {
   /* ----- ジョイスティックの解放 */
   for(int i=0; i<JOY_NUM_MAX; i++) {
@@ -275,13 +271,12 @@ void InputFree(void)
   }
 }
 
-
 /* ---------------------------------------- */
 /* --- キーの定期的読みとり                 */
 /* ---------------------------------------- */
-void InputPoll(void)
+void TInput::Poll()
 {
-  AppExit = 0;
+  AppExit = false;
   /* ----- イベント */
   SDL_Event event;
 
@@ -315,17 +310,16 @@ void InputPoll(void)
       break;
 
     case SDL_QUIT:
-      AppExit = 1;
+      AppExit = true;
       break;
     }
   }
 }
 
-
 /* ---------------------------------------- */
 /* --- アプリケーション終了キーの判別       */
 /* ---------------------------------------- */
-int InputExit(void)
+bool TInput::Exit()
 {
   return AppExit;
 }
@@ -334,7 +328,7 @@ int InputExit(void)
 /* ---------------------------------------- */
 /* --- ユーザー入力の読みとり               */
 /* ---------------------------------------- */
-int InputJoyKey(int side)
+int TInput::JoyKeyDown(int side)
 {
   int r1, r2;
 
@@ -348,11 +342,10 @@ int InputJoyKey(int side)
   return(r1);
 }
 
-
 /* ---------------------------------------- */
 /* --- ユーザー入力のトリガー読みとり       */
 /* ---------------------------------------- */
-int InputJoyKeyTriger(int side)
+int TInput::JoyKeyTriger(int side)
 {
   int  r1, r2;
 
@@ -365,11 +358,10 @@ int InputJoyKeyTriger(int side)
   return(r1);
 }
 
-
 /* ----------------------------------------------- */
 /* --- GP2X 向け、ボタンとスティック入れ替え  */
 /* ----------------------------------------------- */
-void InputJoyKeySwap(bool sw)
+void TInput::JoyKeySwap(bool sw)
 {
   GpKeySwap = sw;
 }

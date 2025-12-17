@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------- */
-/*  sound.h                                                   */
+/*  debug.h                                                   */
 /* ---------------------------------------------------------- */
 
 /*--------------------------------------------------------*/
@@ -8,57 +8,57 @@
 /*                        Fumi2Kick/LiMo/omamori-2002     */
 /*                        1st Maintaner  Rerorero@fumi.   */
 /*                                                        */
-/*   sound.h                                              */
-/*     音声マネージャ                                     */
+/*   debug.pp                                             */
+/*     デバッグ用チェックルーチン                         */
 /*                                                        */
 /*--------------------------------------------------------*/
 
 /*------------------------------------------------------------- */
 /** @file
-    @brief		音声マネージャ
+    @brief		デバッグチェックルーチン
     @author		K.Kunikane (rerofumi)
-    @since		Sep.04.2005
+    @since		Jul.27.2005
 */
 /*-----------------------------------------------------
  Copyright (C) 2002,2005 rerofumi <rero2@yuumu.org>
  All Rights Reserved.
  ------------------------------------------------------*/
 
-#ifndef SOUND_H
-#define SOUND_H
+#ifndef DEBUG_H
+#define DEBUG_H
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
+#include "grp_screen.hpp"
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
 
-/* --- BGM の管理最大数 */
-#define BGMMAX 8
+/* ----- メッセージの表示量 */
+#define  MessageMax  20
 
-/* --- SE の管理最大数 */
-#define SEMAX 16
-
-/* --- VOUME の最大値 */
-#define VOLUMEDEFAULT MIX_MAX_VOLUME/2
+#ifdef DEBUG
+ #define DEBUGPRINT(FMT, ...) \
+    snprintf(debug_line, 127, FMT, __VA_ARGS__); \
+    TDebugPrint(debug_line);
+#else
+ #define DEBUGPRINT(FMT, ...) 
+#endif
 
 /*-------------------------------*/
 /* struct                        */
 /*-------------------------------*/
 
+extern char debug_line[128];
+
 /* ---------------------------------------------- */
 /* --- extern                                  -- */
 /* ---------------------------------------------- */
 
-void SoundInit();
-void SoundFree();
-void SoundMusic(int req);
-void SoundMusicOneshot(int req);
-void SoundSE(int req);
-void SoundMusicStop();
-void SoundSEStop();
-void SoundVolume(int value);
+void TDebugInit(TGameScreen *screen);
+void TDebugFree();
+void TDebugDisp(TGameScreen *screen);
+void TDebugPrint(char *mes);
+void IntToStr(int num, char *buf);
+void IntToHex(int num, int length, char *buf);
 
-#endif //SOUND_H
+#endif //DEBUG_H

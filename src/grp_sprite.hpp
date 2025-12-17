@@ -13,42 +13,36 @@
 /*                                                        */
 /*--------------------------------------------------------*/
 
-#ifndef GRP_SPRITE_H
-#define GRP_SPRITE_H
+#ifndef GRP_SPRITE_HPP
+#define GRP_SPRITE_HPP
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
+#include "support.hpp"
 
-#include <stdbool.h>
-#include <SDL.h>
+struct SDL_Texture;
 
-/*-------------------------------*/
-/* define                        */
-/*-------------------------------*/
+/* ---------------------------------------------- */
+/* --- テクスチャ管理クラス                      -- */
+/* ---------------------------------------------- */
+struct TGameSprite {
+  TGameSprite() : TextureId(-1), DispSw(false), Texture(NULL) {}
+  TGameSprite(const TGameSprite&) = delete;
+  TGameSprite& operator=(const TGameSprite&) = delete;
 
-/*-------------------------------*/
-/* struct                        */
-/*-------------------------------*/
+  // --- テクスチャーの登録
+  inline void SetTexture(int texture_id, SDL_Texture *texture)
+  {
+    TextureId = texture_id;
+    Texture = texture;
+  }
 
-typedef struct {
-  int  TextureId;
+  int TextureId;
   /* - public */
   bool DispSw;
-  int  x, y;
-  int  w, h;
-  int  tx, ty;
-  unsigned char  alpha;
-  SDL_Texture  *Texture;
-} TGameSprite, *PTGameSprite;
+  int x, y;
+  int w, h;
+  int tx, ty;
+  unsigned char alpha;
+  SDL_Texture *Texture;
+};
 
-/* ---------------------------------------------- */
-/* --- extern                                  -- */
-/* ---------------------------------------------- */
-
-TGameSprite *TGameSprite_Create();
-void TGameSprite_Destroy(TGameSprite *class);
-void TGameSprite_SetTextureDirect(TGameSprite *class, int  texture_id,
-                                  SDL_Texture *texture);
-
-#endif //GRP_SPRITE_H
+#endif //GRP_SPRITE_HPP

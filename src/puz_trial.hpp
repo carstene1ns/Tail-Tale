@@ -16,61 +16,57 @@
 #ifndef PUZ_TRIAL_H
 #define PUZ_TRIAL_H
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
-#include <stdbool.h>
-#include "grp_screen.h"
-#include "puz_base.h"
-#include "puz_disp.h"
-#include "debug.h"
+#include "support.hpp"
+
+class TGame;
+class TGameScreen;
+class TPuzzleDisp;
 
 /*-------------------------------*/
 /* define                        */
 /*-------------------------------*/
-
-enum TrialStep {
-  TInit,
-  TReady,
-  TGame,
-  TMiss,
-  TGameover,
-  TEnd
+enum class TrialStep {
+  Init,
+  Ready,
+  Game,
+  Miss,
+  Gameover,
+  End
 };
 
-/*-------------------------------*/
-/* struct                        */
-/*-------------------------------*/
-
-/* -------------------------------- */
+/* ---------------------------------------------- */
+/* --- class                                   -- */
+/* ---------------------------------------------- */
 /* --- クラスメンバー */
-typedef struct {
+class TPuzzleTrial {
+public:
+  TPuzzleTrial() = delete;
+  explicit TPuzzleTrial(TGame *game, int level);
+  TPuzzleTrial(const TPuzzleTrial&) = delete;
+  TPuzzleTrial& operator=(const TPuzzleTrial&) = delete;
+
+  void LoadTexture();
+  void GameMain();
+  bool GameStat();
+  void UserControl();
+
+private:
+  void ChangeCharacter(int level);
+
   /* - 親クラス */
-  TPuzzleDisp  *super;
+  unique_ptr<TPuzzleDisp> disp;
   /* - ゲーム状態 */
-  bool  status;
+  bool status;
 
   /* - ゲーム画面 */
-  TGameScreen  *screen;
+  TGame *game;
   /* - ステート */
-  int  step;
+  TrialStep step;
   /* - スタートカウント */
-  int  readytimer;
+  int readytimer;
 
   /* - 難易度 */
-  int  game_level;
-
-} TPuzzleTrial, *PTPuzzleTrial;
-
-/* ---------------------------------------------- */
-/* --- extern                                  -- */
-/* ---------------------------------------------- */
-
-TPuzzleTrial *TPuzzleTrial_Create(TGameScreen *scr, int level);
-void TPuzzleTrial_Destroy(TPuzzleTrial *class);
-void TPuzzleTrial_LoadTexture(TPuzzleTrial *class);
-void TPuzzleTrial_GameMain(TPuzzleTrial *class);
-bool TPuzzleTrial_GameStat(TPuzzleTrial *class);
-void TPuzzleTrial_UserControl(TPuzzleTrial *class);
+  int game_level;
+};
 
 #endif //PUZ_TRIAL_H

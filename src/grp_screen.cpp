@@ -25,25 +25,10 @@
  All Rights Reserved.
  ------------------------------------------------------*/
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
-
-#include <stdlib.h>
-#include "cute_png.h"
-#include "grp_screen.h"
-#include "debug.h"
-
-/*-------------------------------*/
-/* local value                   */
-/*-------------------------------*/
-
-/*-------------------------------*/
-/* local function                */
-/*-------------------------------*/
-
-/* --- スプライトを一枚スクリーンに貼り付ける */
-static void Render(TGameScreen *class, TGameSprite *spr);
+#include <cstdlib>
+#include "cute_png.hpp"
+#include "grp_screen.hpp"
+#include "debug.hpp"
 
 /* -------------------------------------------------------------- */
 /* --- スクリーン管理クラス                                       */
@@ -51,120 +36,101 @@ static void Render(TGameScreen *class, TGameSprite *spr);
 
 /* ---------------------------------------- */
 /* --- コンストラクタ・デストラクタ         */
-TGameScreen *TGameScreen_Create(int width, int height, const char *title)
+TGameScreen::TGameScreen(int width, int height, const char *title)
 {
-  /* --- インスタンスの生成 */
-  TGameScreen *class = malloc(sizeof(TGameScreen));
-  if (!class) return NULL;
-
   /* ----- スクリーンの生成 */
-  class->Window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-                                   SDL_WINDOWPOS_UNDEFINED, width, height,
-                                   SDL_WINDOW_RESIZABLE);
-  class->Renderer = SDL_CreateRenderer(class->Window, -1, 0);
-  SDL_RenderSetLogicalSize(class->Renderer, width, height);
+  Window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
+                            SDL_WINDOWPOS_UNDEFINED, width, height,
+                            SDL_WINDOW_RESIZABLE);
+  Renderer = SDL_CreateRenderer(Window, -1, 0);
+  SDL_RenderSetLogicalSize(Renderer, width, height);
 
   for(int i=0; i<TEXTUREMAX; i++) {
-    class->Textures[i] = NULL;
+    Textures[i] = NULL;
   }
-  class->Width = width; // UNUSED
-  class->Height = height; // UNUSED
-  class->pixelFormat = SDL_PIXELFORMAT_RGBA32; // TODO
+
+  Width = width; // UNUSED
+  Height = height; // UNUSED
+  pixelFormat = SDL_PIXELFORMAT_RGBA32; // TODO
+
   /* --- 初期化 */
   for(int i=0; i<SPRITEMAX; i++) {
-    class->Sprites[i] = TGameSprite_Create();
+    Sprites[i] = make_unique<TGameSprite>();
   }
 
   /* ----- デバッグプリントの初期化 */
 #ifdef DEBUG
-  TDebugInit(class, width, height);
+  TDebugInit(this);
 #endif
-
-  /* --- ポインタを返して終了 */
-  return class;
 }
 
-void TGameScreen_Destroy(TGameScreen *class)
+TGameScreen::~TGameScreen()
 {
-  if (!class) return;
-
   /* ----- テクスチャの解放 */
   for(int i=0; i<TEXTUREMAX; i++) {
-    SDL_DestroyTexture(class->Textures[i]);
+    SDL_DestroyTexture(Textures[i]);
   }
 
   /* ----- スクリーンの解放 */
-  SDL_DestroyRenderer(class->Renderer);
-  SDL_DestroyWindow(class->Window);
-
-  /* ----- スプライトの解放 */
-  for(int i=0; i<SPRITEMAX; i++) {
-    TGameSprite_Destroy(class->Sprites[i]);
-  }
+  SDL_DestroyRenderer(Renderer);
+  SDL_DestroyWindow(Window);
 
   /* ----- デバッグも終了 */
 #ifdef DEBUG
   TDebugFree();
 #endif
-
-  /* ----- インスタンスの破棄 */
-  free(class);
 }
 
 /* ---------------------------------------- */
 /* --- ウィンドウタイトルの設定             */
-void TGameScreen_SetWMName(TGameScreen *class, char *name)
+void TGameScreen::SetWMName(char *name)
 {
-  SDL_SetWindowTitle(class->Window, name);
+  SDL_SetWindowTitle(Window, name);
 }
-
 
 /* ---------------------------------------- */
 /* --- フレームタイミングによる全描画       */
-void TGameScreen_DispScreen(TGameScreen *class)
+void TGameScreen::DispScreen()
 {
   /* --- スプライト描画 */
   for(int i=0; i<SPRITEMAX; i++) {
-    if (class->Sprites[i]->DispSw && class->Sprites[i]->Texture) {
+    if (Sprites[i]->DispSw && Sprites[i]->Texture) {
       /* --- スプライトの描画 */
-      Render(class, class->Sprites[i]);
+      Render(Sprites[i].get());
     }
   }
 }
 
-void TGameScreen_RefreshScreen(TGameScreen *class)
+void TGameScreen::RefreshScreen()
 {
   /* --- 全クリア */
-  SDL_SetRenderDrawColor(class->Renderer, 0, 0, 0x40, 0xff);
-  SDL_RenderClear(class->Renderer);
+  SDL_SetRenderDrawColor(Renderer, 0, 0, 0x40, 0xff);
+  SDL_RenderClear(Renderer);
 
   /* -- 画面更新 */
-  TGameScreen_DispScreen(class);
+  TGameScreen::DispScreen();
 
   /* -- 開発デバッグフォント */
 #ifdef DEBUG
-  TDebugDisp(class);
+  TDebugDisp(this);
 #endif
 
   /* --- スクリーンアップデート */
-  SDL_RenderPresent(class->Renderer);
+  SDL_RenderPresent(Renderer);
 }
-
 
 /* ---------------------------------------- */
 /* --- テクスチャをロードする               */
 
-void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename)
+void TGameScreen::LoadTexture(int num, const char *filename)
 {
-  if (!class) return;
-
   /* ----- テクスチャ番号が不正だったら終了 */
   if (num < 0 || num > TEXTUREMAX) return;
 
   /* ----- 既にテクスチャがあったら解放 */
-  if (class->Textures[num] != NULL) {
-    SDL_DestroyTexture(class->Textures[num]);
-    class->Textures[num] = NULL;
+  if (Textures[num] != NULL) {
+    SDL_DestroyTexture(Textures[num]);
+    Textures[num] = NULL;
   }
 
   /* ----- テクスチャーの読み込み */
@@ -188,7 +154,7 @@ void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename)
   cp_image_t png = cp_load_png(name);
   if (!png.pix) {
     printf("...failed: %s\n", cp_error_reason);
-    class->Textures[num] = NULL;
+    Textures[num] = NULL;
     return;
   }
 
@@ -197,41 +163,39 @@ void TGameScreen_LoadTexture(TGameScreen *class, int num, char *filename)
                                                          SDL_PIXELFORMAT_RGBA32);
   if (!temp) {
     cp_free_png(&png);
-    class->Textures[num] = NULL;
+    Textures[num] = NULL;
     return;
   }
 
-  SDL_Texture *plane = SDL_CreateTextureFromSurface(class->Renderer, temp);
+  SDL_Texture *plane = SDL_CreateTextureFromSurface(Renderer, temp);
   SDL_FreeSurface(temp);
   cp_free_png(&png);
   if (!plane) {
-    class->Textures[num] = NULL;
+    Textures[num] = NULL;
     return;
   }
-  class->Textures[num] = plane;
+  Textures[num] = plane;
 }
 
 /* ---------------------------------------- */
 /* --- スプライトを渡す                     */
-TGameSprite *TGameScreen_GetSprite(TGameScreen *class, int id)
+TGameSprite *TGameScreen::GetSprite(int id) const
 {
   if (id < 0 || id > SPRITEMAX) return NULL;
 
-  return class->Sprites[id];
+  return Sprites[id].get();
 }
-
 
 /* ---------------------------------------- */
 /* --- テクスチャを渡す                     */
-SDL_Texture *TGameScreen_GetTexture(TGameScreen *class, int id)
+SDL_Texture *TGameScreen::GetTexture(int id) const
 {
-  return class->Textures[id];
+  return Textures[id];
 }
-
 
 /* ---------------------------------------- */
 /* --- スプライトの表示(画面転送)           */
-static void Render(TGameScreen *class, TGameSprite *spr)
+void TGameScreen::Render(TGameSprite *spr)
 {
   /* --- 表示スイッチ */
   if (!spr->DispSw || !spr->Texture) return;
@@ -250,7 +214,7 @@ static void Render(TGameScreen *class, TGameSprite *spr)
     }
   }
 
-  SDL_RenderCopy(class->Renderer, spr->Texture, &rect1, &rect2);
+  SDL_RenderCopy(Renderer, spr->Texture, &rect1, &rect2);
 
   if (org_alpha != spr->alpha) {
     SDL_SetTextureAlphaMod(spr->Texture, org_alpha);

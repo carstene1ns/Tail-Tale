@@ -13,15 +13,13 @@
 /*                                                        */
 /*--------------------------------------------------------*/
 
-#ifndef PUZ_BASE_H
-#define PUZ_BASE_H
+#ifndef PUZ_BASE_HPP
+#define PUZ_BASE_HPP
 
-/*-------------------------------*/
-/* include                       */
-/*-------------------------------*/
+#include "puz_res.hpp"
 
-#include <stdbool.h>
-#include "puz_res.h"
+class TGame;
+class TSound;
 
 /*-------------------------------*/
 /* define                        */
@@ -40,29 +38,29 @@
 /* --- 何個で消えるか */
 #define LINE_LENGTH  4
 
-enum GamePhase {
-  STEP_PAUSE,
-  STEP_NORMAL,
-  STEP_SWAP,
-  STEP_LINECHECK,
-  STEP_LINEFLASH,
-  STEP_LINEERASE,
-  STEP_DROPCHECK,
-  STEP_DROPWORK,
-  STEP_END
+enum class GamePhase {
+  PAUSE,
+  NORMAL,
+  SWAP,
+  LINECHECK,
+  LINEFLASH,
+  LINEERASE,
+  DROPCHECK,
+  DROPWORK,
+  END
 };
 
-enum MoveDir {
-  MOVE_UP,
-  MOVE_DOWN,
-  MOVE_LEFT,
-  MOVE_RIGHT
+enum class MoveDir {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT
 };
 
-enum SwapFlag {
-  SWAP_NONE,
-  SWAP_MASTER,
-  SWAP_SLAVE
+enum class SwapFlag {
+  NONE,
+  MASTER,
+  SLAVE
 };
 
 /* --- ゲームの難易度設定 */
@@ -78,100 +76,119 @@ enum GameLevel {
 
 typedef struct {
   /* --- ブロックの種類(0で存在せず) */
-  int  Color;
+  int Color;
   /* --- 揃い判定を行うか否かのフラグ */
-  bool  LineCheck;
+  bool LineCheck;
   /* --- 揃ったブロックであるフラグ */
-  bool  LineBlock;
+  bool LineBlock;
   /* --- 揃ってきえるtimer */
-  int  LineTimer;
+  int LineTimer;
   /* --- せり上げtimer */
-  int  PopupTimer;
+  int PopupTimer;
   /* --- せり上げ位置オフセット*/
-  int  PopupOffset;
+  int PopupOffset;
   /* --- 落下するブロックであることのフラグ */
-  bool  DropCheck;
+  bool DropCheck;
   /* --- 落下するアニメーションのtimer */
-  int  DropTimer;
+  int DropTimer;
   /* --- 落下するアニメーションのオフセット */
-  int  DropOffset;
+  int DropOffset;
   /* --- 入れ替えアクションフラグ(入れ替えサイドも兼用) */
-  int  SwapSide; 
+  SwapFlag SwapSide; 
   /* --- 入れ替えアクションtimer */
-  int  SwapTimer;
+  int SwapTimer;
   /* --- 入れ替えアクション位置オフセット */
-  int  SwapOffsetX;
-  int  SwapOffsetY;
-} Block, *PBlock;
-
+  int SwapOffsetX;
+  int SwapOffsetY;
+} Block;
 
 typedef struct {
   /* --- ブロック座標的位置 */
-  int  X;
-  int  Y;
+  int X;
+  int Y;
   /* --- ブロックをつかんでいるか否か */
-  bool  HaveBlock;
+  bool HaveBlock;
   /* --- 入れ替えアクションtimer */
-  int  SwapTimer;
+  int SwapTimer;
   /* --- 入れ替えアクション位置オフセット */
-  int  SwapOffsetX;
-  int  SwapOffsetY;
+  int SwapOffsetX;
+  int SwapOffsetY;
   /* --- ブロックせり上がり時の追随 */
-  int  PopupTimer;
-  int  PopupOffset;
-} Cursor, *PCursor;
+  int PopupTimer;
+  int PopupOffset;
+} Cursor;
 
+/* ---------------------------------------------- */
+/* --- class                                   -- */
+/* ---------------------------------------------- */
 
-typedef struct {
-  int  GameTimer;
+class TPuzzleBase {
+public:
+  TPuzzleBase() = delete;
+  explicit TPuzzleBase(TGame *game, int difficult);
+  TPuzzleBase(const TPuzzleBase&) = delete;
+  TPuzzleBase& operator=(const TPuzzleBase&) = delete;
+
+  void GameInit(int col);
+  void GameExec();
+  void GamePause(GamePhase mode);
+  void GameLevel(int lset);
+  bool LevelCheck();
+  bool MoveRequest(int posx, int posy, MoveDir dir);
+
+private:
+  void SetBlock();
+  Block *GetBlock();
+  int GetBlockColor();
+  void PopupNext();
+  bool PopupWork();
+  int FieldHeight();
+  bool MoveWork();
+  bool DropRequest();
+  bool DropWork();
+  int LineCheck();
+  bool LineWork();
+  int LineCount(int x, int y, int dx, int dy, int layer);
+
+public:
+  int GameTimer;
   /* --- クラス情報 */
   /* - ゲームステップ */
-  int  GameStep;
+  GamePhase GameStep;
   /* - プレイヤーカーソル */
-  Cursor  UA;
+  Cursor UA;
   /* - ブロックの情報 */
-  Block  Item[FIELD_WIDTH * FIELD_HEIGHT];
+  Block Item[FIELD_WIDTH * FIELD_HEIGHT];
   /* - フィールドの情報 */
   Block *Field[FIELD_WIDTH * FIELD_HEIGHT];
   /* - ブロックカラー順(キャラ色を先頭に) */
-  int  BlockColor[7];
+  int BlockColor[7];
   /* - ブロックカラー数 */
-  int  ColorNum;
+  int ColorNum;
   /* - ネクストが来るまでのウェイト */
-  int  NextInterval;
+  int NextInterval;
   /* - ネクストのtimer */
-  int  NextTimer;
+  int NextTimer;
   /* - ゲームレベル */
-  int  Level;
+  int Level;
   /* - キャラクターカラー(ブロックの色に影響) */
-  int  CharaColor;
+  int CharaColor;
   /* - アニメーションフラグ(全体の動きが止まっていたらfalse) */
-  bool  Animation;
+  bool Animation;
   /* - ブロックを消した総数 */
-  int  EraseBlock;
+  int EraseBlock;
   /* - 今回消したブロックによる得点 */
-  int  EraseScore;
+  int EraseScore;
   /* - ゲームの得点 */
-  int  Score;
+  int Score;
   /* - 連鎖回数 */
-  int  Combo;
+  int Combo;
   /* - ゲームオーバーフラグ */
-  bool  GameOver;
+  bool GameOver;
+
+  TSound *sound;
   /* - ゲーム全体の難易度  */
-  int  Difficult;
-} TPuzzleBase, *PTPuzzleBase;
+  int Difficult;
+};
 
-/* ---------------------------------------------- */
-/* --- extern                                  -- */
-/* ---------------------------------------------- */
-
-TPuzzleBase *TPuzzleBase_Create(int difficult);
-void TPuzzleBase_Destroy(TPuzzleBase *class);
-void TPuzzleBase_GameInit(TPuzzleBase *class, int col);
-void TPuzzleBase_GameExec(TPuzzleBase *class);
-void TPuzzleBase_GamePause(TPuzzleBase *class, int mode);
-void TPuzzleBase_GameLevel(TPuzzleBase *class, int lset);
-bool TPuzzleBase_LevelCheck(TPuzzleBase *class);
-bool TPuzzleBase_MoveRequest(TPuzzleBase *class, int posx, int posy, int dir);
-
-#endif //PUZ_BASE_H
+#endif //PUZ_BASE_HPP
